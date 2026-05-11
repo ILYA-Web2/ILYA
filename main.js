@@ -1,736 +1,557 @@
 /* ═══════════════════════════════════════════════════════════
-   TR7 · style.css — Ultra-Premium Dark Mode
-   Cinematic · Fluid · Mobile-First · No Legacy Artifacts
+   TR7 · main.js — Interactive Neon Fluid Background
+   Three.js + GSAP + Cinematic Entrance + Visitor Counter
    ═══════════════════════════════════════════════════════════ */
 
-/* ─── Reset & Variables ─── */
-*,*::before,*::after{
-  margin:0;padding:0;box-sizing:border-box;
-  -webkit-tap-highlight-color:transparent;
+import * as THREE from 'three';
+
+// ──────────────────────────────────────────────
+// 1. DOM References & Config
+// ──────────────────────────────────────────────
+const preloader       = document.getElementById('preloader');
+const preloaderText   = document.getElementById('preloader-text');
+const mainWrapper     = document.getElementById('main-content');
+const linksGrid       = document.getElementById('links-grid');
+const visitCountEl    = document.getElementById('visit-count');
+const canvas          = document.getElementById('webgl-canvas');
+
+let config;
+try {
+  config = JSON.parse(document.getElementById('site-config').textContent);
+} catch (e) {
+  console.error('Invalid site config');
+  config = { profile:{}, branding:{}, colors:{}, texts:{}, links:[] };
 }
 
-:root{
-  /* Core palette */
-  --bg:        #030000;
-  --bg-elevated: rgba(8,2,3,0.92);
-  --pri:       #ff0033;
-  --pri-dim:   #cc001a;
-  --pri-dark:  #8b0000;
-  --accent:    #ff1744;
-  --white:     #ffffff;
-  --white-80:  rgba(255,255,255,0.8);
-  --white-60:  rgba(255,255,255,0.6);
-  --white-40:  rgba(255,255,255,0.4);
-  --glass:     rgba(5,1,2,0.55);
-  --glass-border: rgba(255,0,51,0.18);
-  --font-ar:   'Tajawal','Cairo',sans-serif;
-  --font-en:   'Space Grotesk','Tajawal',sans-serif;
-  --font-mono: 'JetBrains Mono',monospace;
-  --ez:        cubic-bezier(0.16,1,0.3,1);
-  --spring:    cubic-bezier(0.34,1.56,0.64,1);
+// ──────────────────────────────────────────────
+// 2. Utility Functions
+// ──────────────────────────────────────────────
+const W = () => window.innerWidth;
+const H = () => window.innerHeight;
+const DPR = () => Math.min(window.devicePixelRatio, 2); // cap for performance
 
-  /* Dynamic sizes (Mobile-first defaults) */
-  --banner-h:     180px;
-  --avatar-size:  96px;
-  --name-size:    clamp(2.6rem, 10vw, 4.4rem);
-  --title-size:   clamp(0.7rem, 2.4vw, 0.9rem);
-  --bio-size:     clamp(0.9rem, 2.8vw, 1.05rem);
-  --icon-size:    clamp(48px, 14vw, 62px);
-  --footer-size:  clamp(0.65rem, 1.8vw, 0.8rem);
-  --card-radius:  26px;
-}
+// ──────────────────────────────────────────────
+// 3. Preloader Management
+// ──────────────────────────────────────────────
+const hidePreloader = () => {
+  preloader.classList.add('hidden');
+  setTimeout(() => {
+    preloader.style.display = 'none';
+  }, 800);
+};
 
-/* ─── Base ─── */
-html,body{
-  min-height:100dvh;
-  background:var(--bg);
-  color:var(--white);
-  font-family:var(--font-ar);
-  overflow-x:hidden;
-  scroll-behavior:smooth;
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
-  line-height:1.5;
-  transition: background 0.6s ease;
-}
-body{
-  display:flex;
-  flex-direction:column;
-}
+// Update preloader text to show progress (fake stages)
+const updatePreloaderText = (msg) => {
+  if (preloaderText) preloaderText.textContent = msg;
+};
 
-/* WebGL Canvas */
-#webgl-canvas{
-  position:fixed;
-  inset:0;
-  z-index:0;
-  pointer-events:none;
-  display:block;
+// ──────────────────────────────────────────────
+// 4. Three.js Scene Setup
+// ──────────────────────────────────────────────
+let scene, camera, renderer;
+let fluidParticles; // our interactive particle system
+let mouse = new THREE.Vector2(0.5, 0.5);          // normalized screen coords
+let targetMouse = new THREE.Vector2(0.5, 0.5);
+let mouseInfluence = false;
+let clock = new THREE.Clock();
+
+// Particle system parameters
+const PARTICLE_COUNT  = mobileCheck() ? 160 : 280;
+const GRID_COLS       = mobileCheck() ? 16 : 20;
+const GRID_ROWS       = Math.ceil(PARTICLE_COUNT / GRID_COLS);
+const SPACING         = 1.0; // base spacing in world units (will be scaled)
+const RESTITUTION     = 0.08; // return to original position strength
+const REPULSION       = 1.5; // mouse repulsion strength
+const MAX_FORCE       = 0.4;
+const DAMPING         = 0.92;
+
+// Original grid positions (rest positions)
+let originalPositions = new Float32Array(PARTICLE_COUNT * 3);
+// Current positions & velocities
+let positions = new Float32Array(PARTICLE_COUNT * 3);
+let velocities = new Float32Array(PARTICLE_COUNT * 3);
+
+// Sprite texture for glowing point
+let glowTexture;
+
+function mobileCheck() {
+  return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth < 640;
 }
 
-/* ─── Preloader ─── */
-#preloader{
-  position:fixed;
-  inset:0;
-  z-index:9999;
-  background:var(--bg);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:1.8rem;
-  transition: opacity 0.8s var(--ez), visibility 0.8s;
-  cursor:wait;
-}
-#preloader.hidden{
-  opacity:0;
-  visibility:hidden;
-  pointer-events:none;
-}
-.preloader-core{
-  position:relative;
-  width:80px;
-  height:80px;
-}
-.preloader-ring{
-  position:absolute;
-  inset:0;
-  border-radius:50%;
-  border:2px solid transparent;
-  border-top-color:var(--pri);
-  animation:preSpin 1.2s var(--ez) infinite;
-}
-.preloader-ring:nth-child(2){
-  inset:10px;
-  border-top-color:rgba(255,255,255,0.4);
-  animation-duration:1.8s;
-  animation-direction:reverse;
-}
-.preloader-ring:nth-child(3){
-  inset:22px;
-  border-top-color:rgba(255,0,51,0.35);
-  animation-duration:2.4s;
-}
-@keyframes preSpin{
-  to{transform:rotate(360deg)}
-}
-.preloader-label{
-  font-family:var(--font-mono);
-  font-size:0.7rem;
-  letter-spacing:4px;
-  text-transform:uppercase;
-  color:rgba(255,255,255,0.5);
-  animation:prePulse 2s ease-in-out infinite;
-}
-@keyframes prePulse{
-  0%,100%{opacity:0.4}
-  50%{opacity:1}
+function initThree() {
+  // Renderer
+  renderer = new THREE.WebGLRenderer({ 
+    canvas,
+    alpha: false,
+    antialias: false,
+    powerPreference: 'high-performance'
+  });
+  renderer.setPixelRatio(DPR());
+  renderer.setSize(W(), H());
+  renderer.setClearColor(new THREE.Color(config.colors.bg || '#030000'));
+
+  // Scene & Camera (orthographic)
+  scene = new THREE.Scene();
+  const aspect = W() / H();
+  const viewSize = 10; // world units height
+  camera = new THREE.OrthographicCamera(-viewSize * aspect, viewSize * aspect, viewSize, -viewSize, 0.1, 100);
+  camera.position.z = 5;
+
+  // Generate glow texture via canvas
+  glowTexture = createGlowTexture();
+
+  // Create particle system
+  createParticleSystem();
+
+  // Add ambient neon ring (decorative)
+  addNeonRing();
+
+  // Start render loop
+  animate();
 }
 
-/* ─── Main wrapper ─── */
-.main-wrapper{
-  position:relative;
-  z-index:10;
-  width:100%;
-  max-width:720px;
-  margin:0 auto;
-  padding:clamp(1rem,3vw,2.5rem) clamp(0.8rem,2.5vw,1.5rem) clamp(2rem,4vw,4rem);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:clamp(2rem,5vw,4rem);
-  will-change:transform,opacity;
-  /* Hidden initially, revealed by GSAP */
-  opacity:0;
-  transform:translateY(28px);
+function createGlowTexture() {
+  const size = 64;
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  const gradient = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+  gradient.addColorStop(0, 'rgba(255, 50, 80, 1)');
+  gradient.addColorStop(0.2, 'rgba(255, 0, 51, 0.9)');
+  gradient.addColorStop(0.5, 'rgba(200, 0, 30, 0.4)');
+  gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, size, size);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.needsUpdate = true;
+  return texture;
 }
 
-/* ─── Hero Section ─── */
-.hero-section{
-  width:100%;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-}
-.hero-inner{
-  width:100%;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:clamp(1.2rem,3.5vw,2.2rem);
-}
-
-/* Banner */
-.hero-banner-frame{
-  position:relative;
-  width:100%;
-  height:var(--banner-h);
-  border-radius:var(--card-radius) var(--card-radius) 0 0;
-  overflow:hidden;
-  cursor:pointer;
-  isolation:isolate;
-  box-shadow:0 0 0 1px rgba(255,0,51,0.15);
-  transition:box-shadow 0.5s var(--ez),transform 0.5s var(--ez);
-}
-.hero-banner-frame:hover,
-.hero-banner-frame:focus-visible{
-  box-shadow:0 0 0 1px rgba(255,0,51,0.45), 0 0 30px rgba(255,0,51,0.25);
-  transform:scale(1.01);
-}
-.hero-banner-glow{
-  position:absolute;
-  inset:0;
-  background:radial-gradient(ellipse at 50% 50%, rgba(255,0,51,0.15) 0%, transparent 70%);
-  opacity:0;
-  transition:opacity 0.5s;
-  z-index:2;
-  pointer-events:none;
-}
-.hero-banner-frame:hover .hero-banner-glow{
-  opacity:1;
-}
-.hero-banner-img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-  object-position:center 30%;
-  filter:brightness(0.75) contrast(1.1) saturate(1.2);
-  transition:filter 0.7s ease;
-  will-change:transform;
-  animation:kenBurns 24s ease-in-out infinite alternate;
-}
-.hero-banner-frame:hover .hero-banner-img{
-  filter:brightness(0.9) contrast(1.05) saturate(1.3);
-}
-@keyframes kenBurns{
-  0%{transform:scale(1) translate(0,0)}
-  100%{transform:scale(1.06) translate(-1%,-1%)}
-}
-.hero-banner-vignette{
-  position:absolute;
-  inset:0;
-  background:radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.7) 100%);
-  pointer-events:none;
-  z-index:1;
-}
-.hero-banner-scanline{
-  position:absolute;
-  inset:0;
-  background:repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.03) 3px, rgba(0,0,0,0.03) 6px);
-  pointer-events:none;
-  z-index:3;
-}
-
-/* Avatar */
-.hero-avatar-anchor{
-  margin-top:clamp(-48px, -8vw, -58px);
-  z-index:20;
-  position:relative;
-}
-.hero-avatar-frame{
-  position:relative;
-  width:var(--avatar-size);
-  height:var(--avatar-size);
-  cursor:pointer;
-}
-.hero-avatar-orbit{
-  position:absolute;
-  inset:-18px;
-  pointer-events:none;
-}
-.orbit-svg{
-  width:100%;
-  height:100%;
-  overflow:visible;
-}
-.orbit-svg circle{
-  animation:spinOrbit 3.5s linear infinite;
-  transform-origin:100px 100px;
-}
-@keyframes spinOrbit{
-  to{transform:rotate(360deg)}
-}
-.hero-avatar-aura{
-  position:absolute;
-  inset:-22px;
-  border-radius:50%;
-  background:radial-gradient(circle, rgba(255,0,51,0.2) 0%, transparent 68%);
-  filter:blur(14px);
-  animation:auraPulse 4s ease-in-out infinite alternate;
-  z-index:0;
-}
-@keyframes auraPulse{
-  0%{opacity:0.4;transform:scale(0.9)}
-  100%{opacity:1;transform:scale(1.15)}
-}
-.hero-avatar-img{
-  width:100%;
-  height:100%;
-  border-radius:50%;
-  object-fit:cover;
-  object-position:center top;
-  border:2px solid rgba(255,0,51,0.35);
-  box-shadow:0 0 0 3px rgba(3,0,0,0.9), 0 0 20px rgba(255,0,51,0.35), 0 15px 35px rgba(0,0,0,0.85);
-  position:relative;
-  z-index:2;
-  transition:box-shadow 0.5s var(--ez), transform 0.3s;
-  will-change:transform;
-  animation:avatarFloat 6s ease-in-out infinite;
-}
-@keyframes avatarFloat{
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-8px)}
-}
-.hero-avatar-frame:hover .hero-avatar-img{
-  box-shadow:0 0 0 3px rgba(3,0,0,0.9), 0 0 40px rgba(255,23,68,0.7), 0 0 70px rgba(255,0,51,0.25);
-  animation-play-state:paused;
-}
-
-/* Identity */
-.hero-identity{
-  text-align:center;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:0.5rem;
-}
-.hero-name{
-  font-family:var(--font-ar);
-  font-size:var(--name-size);
-  font-weight:900;
-  line-height:1.1;
-  position:relative;
-  display:inline-block;
-}
-.hero-name-text{
-  background:linear-gradient(140deg, #ff1744 0%, #ff6677 30%, #fff 52%, #ff4466 74%, #cc001a 100%);
-  background-size:300% 300%;
-  -webkit-background-clip:text;
-  background-clip:text;
-  color:transparent;
-  animation:nameGrad 5s ease-in-out infinite;
-  display:inline-block;
-}
-@keyframes nameGrad{
-  0%,100%{background-position:0% 50%}
-  50%{background-position:100% 50%}
-}
-.hero-name-underline{
-  display:block;
-  height:2px;
-  width:60%;
-  margin:8px auto 0;
-  background:linear-gradient(90deg, transparent, var(--pri), var(--accent), transparent);
-  animation:lineSwipe 4s ease-in-out infinite;
-  will-change:transform;
-}
-@keyframes lineSwipe{
-  0%,100%{transform:scaleX(0.1);opacity:0}
-  30%,70%{transform:scaleX(1);opacity:1}
-}
-.hero-title{
-  font-family:var(--font-en);
-  font-size:var(--title-size);
-  font-weight:600;
-  text-transform:uppercase;
-  letter-spacing:2.5px;
-  color:rgba(255,255,255,0.6);
-  display:flex;
-  align-items:center;
-  gap:7px;
-}
-.hero-title-bracket{
-  color:var(--accent);
-  font-weight:900;
-  font-size:1.4em;
-  display:inline-block;
-  animation:bracketOpen 4s var(--ez) infinite;
-}
-.hero-title-bracket:last-child{
-  animation-name:bracketClose;
-}
-@keyframes bracketOpen{
-  0%,8%{transform:translateX(0);opacity:0.5}
-  30%,50%{transform:translateX(-10px);opacity:1;text-shadow:0 0 12px var(--pri)}
-  58%,100%{transform:translateX(0);opacity:0.5}
-}
-@keyframes bracketClose{
-  0%,8%{transform:translateX(0);opacity:0.5}
-  30%,50%{transform:translateX(10px);opacity:1;text-shadow:0 0 12px var(--pri)}
-  58%,100%{transform:translateX(0);opacity:0.5}
-}
-.hero-title-words{
-  display:inline-block;
-  animation:wordFade 4s ease-in-out infinite;
-}
-@keyframes wordFade{
-  0%,8%{opacity:0.25}
-  25%,55%{opacity:1}
-  62%,100%{opacity:0.25}
-}
-
-/* Bio Card */
-.hero-bio-card{
-  width:100%;
-  max-width:600px;
-  background:rgba(3,0,0,0.65);
-  backdrop-filter:blur(24px) saturate(160%);
-  -webkit-backdrop-filter:blur(24px) saturate(160%);
-  border-radius:22px;
-  border:1px solid rgba(255,0,51,0.12);
-  padding:clamp(1rem,2.5vw,1.5rem) clamp(1rem,3vw,1.8rem);
-  position:relative;
-  overflow:hidden;
-  box-shadow:0 15px 40px rgba(0,0,0,0.8), inset 0 0 0 0.5px rgba(255,0,51,0.08);
-}
-.bio-card-border{
-  position:absolute;
-  inset:0;
-  border-radius:inherit;
-  pointer-events:none;
-  z-index:2;
-  border:1px solid transparent;
-  background:linear-gradient(120deg, rgba(255,0,51,0.22), transparent 50%, rgba(255,0,51,0.1)) border-box;
-  -webkit-mask:linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-  mask:linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite:destination-out;
-  mask-composite:exclude;
-}
-.bio-card-grain{
-  position:absolute;
-  inset:0;
-  opacity:0.35;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-  background-size:200px 200px;
-  pointer-events:none;
-  z-index:0;
-  animation:grain 8s steps(1) infinite;
-}
-@keyframes grain{
-  0%{transform:translate(0,0)}
-  20%{transform:translate(40px,100px)}
-  40%{transform:translate(-60px,20px)}
-  60%{transform:translate(100px,-40px)}
-  80%{transform:translate(-20px,70px)}
-  100%{transform:translate(0,0)}
-}
-.hero-bio-text{
-  position:relative;
-  z-index:1;
-  font-size:var(--bio-size);
-  line-height:1.95;
-  color:rgba(255,255,255,0.82);
-  text-align:justify;
-  font-weight:400;
-}
-
-/* ─── Links Section ─── */
-.links-section{
-  width:100%;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:1.8rem;
-}
-.links-header{
-  width:100%;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:clamp(0.5rem,2vw,1.2rem);
-}
-.links-header-line{
-  flex:1;
-  height:1px;
-  max-width:65px;
-  background:linear-gradient(90deg, transparent, rgba(255,0,51,0.45));
-}
-.links-header-line:last-child{
-  background:linear-gradient(270deg, transparent, rgba(255,0,51,0.45));
-}
-.links-header-title{
-  font-family:var(--font-ar);
-  font-size:clamp(1.8rem, 6vw, 2.6rem);
-  font-weight:800;
-  color:var(--white);
-  animation:titleGlow 4s ease-in-out infinite;
-}
-@keyframes titleGlow{
-  0%,100%{opacity:0.85;text-shadow:0 0 10px rgba(255,0,51,0.35)}
-  50%{opacity:1;text-shadow:0 0 25px rgba(255,0,51,0.7), 0 0 45px rgba(255,0,51,0.3)}
-}
-.links-grid{
-  width:100%;
-  display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(110px, 1fr));
-  gap:clamp(0.6rem,1.8vw,1rem);
-  justify-items:center;
-}
-
-/* Individual Link Card */
-.link-card{
-  position:relative;
-  width:100%;
-  max-width:150px;
-  background:rgba(6,1,2,0.7);
-  backdrop-filter:blur(24px) saturate(160%);
-  -webkit-backdrop-filter:blur(24px) saturate(160%);
-  border-radius:22px;
-  border:1px solid rgba(255,0,51,0.12);
-  padding:clamp(1rem,2.5vw,1.3rem) 0.5rem clamp(0.9rem,2.2vw,1.1rem);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:0.5rem;
-  cursor:pointer;
-  overflow:hidden;
-  text-decoration:none;
-  color:inherit;
-  transition:transform 0.4s var(--spring), box-shadow 0.4s var(--ez), background 0.4s;
-  will-change:transform;
-  animation:cardFloat 9s ease-in-out infinite;
-}
-@keyframes cardFloat{
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-8px)}
-}
-.link-card:hover,
-.link-card:focus-visible{
-  transform:translateY(-14px) scale(1.05)!important;
-  animation-play-state:paused;
-  background:rgba(15,3,5,0.9);
-  border-color:rgba(255,0,51,0.5);
-  box-shadow:0 22px 45px rgba(255,0,51,0.22), 0 0 50px rgba(255,0,51,0.08);
-}
-.card-glow{
-  position:absolute;
-  inset:0;
-  border-radius:inherit;
-  background:radial-gradient(circle at 50% 50%, rgba(255,0,51,0.1) 0%, transparent 70%);
-  opacity:0;
-  transition:opacity 0.4s;
-  pointer-events:none;
-}
-.link-card:hover .card-glow{
-  opacity:1;
-}
-.card-sheen{
-  position:absolute;
-  inset:0;
-  border-radius:inherit;
-  background:linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 55%);
-  pointer-events:none;
-}
-.link-icon-wrap{
-  position:relative;
-  z-index:1;
-  width:var(--icon-size);
-  height:var(--icon-size);
-  border-radius:18px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:clamp(1.5rem, 4.5vw, 2rem);
-  background:rgba(10,2,4,0.7);
-  animation:iconFloat 5s ease-in-out infinite;
-  transition:transform 0.3s, filter 0.3s;
-}
-.link-card:hover .link-icon-wrap{
-  animation-play-state:paused;
-  transform:translateY(-3px) scale(1.1);
-  filter:brightness(1.3) saturate(1.5);
-}
-@keyframes iconFloat{
-  0%,100%{transform:translateY(0)}
-  40%{transform:translateY(-6px)}
-  70%{transform:translateY(2px)}
-}
-.link-name{
-  position:relative;
-  z-index:1;
-  font-family:var(--font-en);
-  font-size:clamp(0.65rem, 2vw, 0.8rem);
-  font-weight:700;
-  text-transform:uppercase;
-  letter-spacing:0.5px;
-  color:var(--white);
-}
-.link-handle{
-  position:relative;
-  z-index:1;
-  font-family:var(--font-mono);
-  font-size:clamp(0.5rem, 1.4vw, 0.65rem);
-  color:rgba(255,255,255,0.6);
-  background:rgba(0,0,0,0.5);
-  padding:0.15rem 0.7rem;
-  border-radius:99px;
-  border:1px solid rgba(255,0,51,0.15);
-}
-
-/* ─── Footer ─── */
-.site-footer{
-  width:100%;
-  display:flex;
-  flex-direction:column;
-  gap:1rem;
-}
-.footer-divider{
-  display:flex;
-  align-items:center;
-  gap:0.8rem;
-  width:100%;
-}
-.footer-divider-line{
-  flex:1;
-  height:1px;
-  background:linear-gradient(90deg, transparent, rgba(255,0,51,0.3));
-}
-.footer-divider-line:last-child{
-  background:linear-gradient(270deg, transparent, rgba(255,0,51,0.3));
-}
-.footer-divider-gem{
-  color:var(--pri);
-  font-size:0.7rem;
-  animation:gemGlow 3s ease-in-out infinite;
-}
-@keyframes gemGlow{
-  0%,100%{opacity:0.3}
-  50%{opacity:0.85}
-}
-.footer-content{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  flex-wrap:wrap;
-  gap:0.8rem;
-}
-.footer-left{
-  display:flex;
-  align-items:center;
-  flex-wrap:wrap;
-  gap:0.8rem;
-}
-.footer-copy{
-  font-family:var(--font-ar);
-  font-size:var(--footer-size);
-  color:rgba(255,255,255,0.5);
-}
-.footer-visitor-badge{
-  display:inline-flex;
-  align-items:center;
-  gap:5px;
-  background:rgba(5,1,1,0.85);
-  border:1px solid rgba(255,0,51,0.25);
-  border-radius:99px;
-  padding:0.3rem 0.9rem;
-  font-family:var(--font-en);
-  font-weight:700;
-  font-size:0.75rem;
-  color:var(--white);
-  backdrop-filter:blur(8px);
-  box-shadow:0 0 12px rgba(255,0,51,0.12);
-  transition:box-shadow 0.4s;
-}
-.footer-visitor-badge:hover{
-  box-shadow:0 0 20px rgba(255,0,51,0.3);
-}
-.visit-count{
-  transition:transform 0.25s var(--spring);
-  display:inline-block;
-}
-.visit-label{
-  font-size:0.6em;
-  color:rgba(255,0,51,0.65);
-  letter-spacing:1px;
-}
-.footer-url{
-  display:flex;
-  align-items:center;
-  gap:0.35rem;
-  color:rgba(255,255,255,0.5);
-  text-decoration:none;
-  font-family:var(--font-mono);
-  font-size:var(--footer-size);
-  padding:0.35rem 1rem;
-  border-radius:99px;
-  background:rgba(0,0,0,0.45);
-  border:1px solid rgba(255,0,51,0.18);
-  backdrop-filter:blur(8px);
-  transition:all 0.35s var(--ez);
-}
-.footer-url:hover{
-  background:rgba(255,0,51,0.08);
-  border-color:rgba(255,0,51,0.45);
-  box-shadow:0 0 18px rgba(255,0,51,0.25);
-  color:var(--white);
-}
-.footer-url-arrow{
-  color:var(--accent);
-  font-size:0.9em;
-}
-
-/* ─── Responsive: Tablet & Desktop ─── */
-@media (min-width: 640px){
-  :root{
-    --banner-h: 240px;
-    --avatar-size: 115px;
-    --card-radius: 36px;
+function createParticleSystem() {
+  // Populate original grid positions
+  const cols = GRID_COLS;
+  const rows = GRID_ROWS;
+  const spacing = SPACING;
+  const offsetX = (cols - 1) * spacing * 0.5;
+  const offsetY = (rows - 1) * spacing * 0.5;
+  
+  let idx = 0;
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      if (idx >= PARTICLE_COUNT) break;
+      const x = j * spacing - offsetX;
+      const y = i * spacing - offsetY;
+      originalPositions[idx * 3]     = x;
+      originalPositions[idx * 3 + 1] = y;
+      originalPositions[idx * 3 + 2] = 0;
+      positions[idx * 3]     = x;
+      positions[idx * 3 + 1] = y;
+      positions[idx * 3 + 2] = 0;
+      velocities[idx * 3]     = 0;
+      velocities[idx * 3 + 1] = 0;
+      velocities[idx * 3 + 2] = 0;
+      idx++;
+    }
   }
-  .hero-bio-card{
-    border-radius:28px;
+
+  // Geometry & Material
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  // Custom sizes for each particle (based on distance to mouse? we'll update in loop)
+  geometry.setAttribute('size', new THREE.BufferAttribute(new Float32Array(PARTICLE_COUNT), 1));
+  geometry.setAttribute('alpha', new THREE.BufferAttribute(new Float32Array(PARTICLE_COUNT), 1));
+  
+  const material = new THREE.ShaderMaterial({
+    uniforms: {
+      uTexture: { value: glowTexture },
+      uTime:    { value: 0 }
+    },
+    vertexShader: /* glsl */ `
+      attribute float size;
+      attribute float alpha;
+      varying float vAlpha;
+      void main() {
+        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+        gl_PointSize = size * (300.0 / -mvPosition.z); // adjust for perspective? ortho so constant factor
+        gl_Position = projectionMatrix * mvPosition;
+        vAlpha = alpha;
+      }
+    `,
+    fragmentShader: /* glsl */ `
+      varying float vAlpha;
+      uniform sampler2D uTexture;
+      void main() {
+        vec4 texColor = texture2D(uTexture, gl_PointCoord);
+        gl_FragColor = vec4(texColor.rgb, texColor.a * vAlpha);
+      }
+    `,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    depthTest: false,
+    transparent: true
+  });
+
+  fluidParticles = new THREE.Points(geometry, material);
+  scene.add(fluidParticles);
+
+  // Initial alpha/size
+  updateParticleAttributes();
+}
+
+// Add a subtle rotating neon ring behind particles
+function addNeonRing() {
+  const ringGeo = new THREE.TorusGeometry(4.5, 0.02, 16, 100);
+  const ringMat = new THREE.MeshBasicMaterial({
+    color: new THREE.Color(config.colors.primary || '#ff0033'),
+    transparent: true,
+    opacity: 0.15,
+    blending: THREE.AdditiveBlending,
+    depthTest: false,
+    depthWrite: false
+  });
+  const ring = new THREE.Mesh(ringGeo, ringMat);
+  ring.rotation.x = Math.PI / 2;
+  ring.position.z = -1;
+  scene.add(ring);
+  // Rotate slowly
+  ring.userData = { speed: 0.1 };
+  // We'll update rotation in loop
+  fluidParticles.userData = { ring };
+}
+
+// ──────────────────────────────────────────────
+// 5. Animation Loop & Particle Physics
+// ──────────────────────────────────────────────
+function animate() {
+  requestAnimationFrame(animate);
+
+  const dt = Math.min(clock.getDelta(), 0.1); // cap dt
+  // Smooth mouse movement
+  mouse.lerp(targetMouse, 0.1);
+  
+  // Update particle positions based on mouse influence
+  updateParticles(dt, mouse);
+
+  // Update ring rotation
+  if (fluidParticles.userData.ring) {
+    fluidParticles.userData.ring.rotation.z += fluidParticles.userData.ring.userData.speed * dt;
   }
-  .links-grid{
-    grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));
+
+  // Update shader time uniform (optional)
+  if (fluidParticles.material.uniforms) {
+    fluidParticles.material.uniforms.uTime.value += dt;
+  }
+
+  renderer.render(scene, camera);
+}
+
+function updateParticles(dt, currentMouse) {
+  const cols = GRID_COLS;
+  const rows = GRID_ROWS;
+  const spacing = SPACING;
+  const offsetX = (cols - 1) * spacing * 0.5;
+  const offsetY = (rows - 1) * spacing * 0.5;
+  
+  // Convert mouse to world coordinates (mapping [0,1] to world range)
+  // Ortho camera: left = -viewSize*aspect, right = +viewSize*aspect, top = viewSize, bottom = -viewSize
+  const viewAspect = W() / H();
+  const worldWidth = 10 * viewAspect;
+  const worldHeight = 10;
+  const mx = (currentMouse.x - 0.5) * worldWidth;
+  const my = (0.5 - currentMouse.y) * worldHeight; // flip Y
+
+  const sizes = new Float32Array(PARTICLE_COUNT);
+  const alphas = new Float32Array(PARTICLE_COUNT);
+
+  for (let i = 0; i < PARTICLE_COUNT; i++) {
+    const i3 = i * 3;
+    const ox = originalPositions[i3];
+    const oy = originalPositions[i3 + 1];
+    let px = positions[i3];
+    let py = positions[i3 + 1];
+    let vx = velocities[i3];
+    let vy = velocities[i3 + 1];
+
+    // Force towards original position (elastic)
+    const dxOrigin = ox - px;
+    const dyOrigin = oy - py;
+    vx += dxOrigin * RESTITUTION;
+    vy += dyOrigin * RESTITUTION;
+
+    // Mouse repulsion (if mouseInfluence)
+    if (mouseInfluence) {
+      const dxMouse = px - mx;
+      const dyMouse = py - my;
+      const distMouse = Math.sqrt(dxMouse * dxMouse + dyMouse * dyMouse) + 0.01;
+      const forceMag = REPULSION / (distMouse * distMouse + 0.8);
+      const forceX = (dxMouse / distMouse) * forceMag;
+      const forceY = (dyMouse / distMouse) * forceMag;
+      vx += forceX;
+      vy += forceY;
+    }
+
+    // Clamp force
+    const speed = Math.sqrt(vx * vx + vy * vy);
+    if (speed > MAX_FORCE) {
+      vx = (vx / speed) * MAX_FORCE;
+      vy = (vy / speed) * MAX_FORCE;
+    }
+
+    // Damping
+    vx *= DAMPING;
+    vy *= DAMPING;
+
+    // Update position
+    px += vx * dt * 2.5; // speed factor
+    py += vy * dt * 2.5;
+
+    // Store back
+    positions[i3]     = px;
+    positions[i3 + 1] = py;
+    velocities[i3]    = vx;
+    velocities[i3 + 1] = vy;
+
+    // Compute size & alpha based on velocity / distance from origin
+    const distOrigin = Math.sqrt(dxOrigin * dxOrigin + dyOrigin * dyOrigin);
+    const vel = Math.sqrt(vx * vx + vy * vy);
+    const size = 0.08 + vel * 2.5;
+    const alpha = 0.4 + vel * 4.0;
+    sizes[i] = size;
+    alphas[i] = Math.min(alpha, 1.0);
+  }
+
+  // Update geometry attributes
+  fluidParticles.geometry.attributes.position.needsUpdate = true;
+  fluidParticles.geometry.attributes.size.array.set(sizes);
+  fluidParticles.geometry.attributes.size.needsUpdate = true;
+  fluidParticles.geometry.attributes.alpha.array.set(alphas);
+  fluidParticles.geometry.attributes.alpha.needsUpdate = true;
+}
+
+// ──────────────────────────────────────────────
+// 6. Event Handlers (Mouse, Touch, Gyro, Resize)
+// ──────────────────────────────────────────────
+function onMouseMove(e) {
+  targetMouse.x = e.clientX / W();
+  targetMouse.y = e.clientY / H();
+  mouseInfluence = true;
+}
+function onMouseLeave() {
+  mouseInfluence = false;
+  targetMouse.set(0.5, 0.5);
+}
+function onTouchMove(e) {
+  if (e.touches.length) {
+    targetMouse.x = e.touches[0].clientX / W();
+    targetMouse.y = e.touches[0].clientY / H();
+    mouseInfluence = true;
   }
 }
-@media (min-width: 860px){
-  .main-wrapper{
-    padding:2.8rem 1.8rem 5rem;
-  }
-  :root{
-    --banner-h: 260px;
-    --avatar-size: 120px;
+function onTouchEnd() {
+  mouseInfluence = false;
+  targetMouse.set(0.5, 0.5);
+}
+
+// Gyroscope parallax (mobile)
+let gyroEnabled = false;
+function enableGyro() {
+  if (window.DeviceOrientationEvent && !gyroEnabled) {
+    window.addEventListener('deviceorientation', (e) => {
+      if (!mouseInfluence) { // only if not touching
+        const x = e.gamma / 45; // -1 to 1
+        const y = e.beta  / 45;
+        targetMouse.x = THREE.MathUtils.clamp((x + 1) / 2, 0, 1);
+        targetMouse.y = THREE.MathUtils.clamp((y + 1) / 2, 0, 1);
+      }
+    }, true);
+    gyroEnabled = true;
   }
 }
 
-/* ─── Mobile fine-tune (< 380px) ─── */
-@media (max-width: 380px){
-  .links-grid{
-    grid-template-columns:repeat(3, 1fr);
-    gap:0.5rem;
+function onResize() {
+  renderer.setSize(W(), H());
+  const aspect = W() / H();
+  camera.left = -5 * aspect;
+  camera.right = 5 * aspect;
+  camera.top = 5;
+  camera.bottom = -5;
+  camera.updateProjectionMatrix();
+}
+
+// ──────────────────────────────────────────────
+// 7. Visitor Counter (API + localStorage fallback)
+// ──────────────────────────────────────────────
+const LS_KEY = 'tr7_lv_v2';
+
+async function updateVisitorCount() {
+  async function tryFetch() {
+    const ctrl = new AbortController();
+    const timeout = setTimeout(() => ctrl.abort(), 4000);
+    try {
+      const res = await fetch('https://api.counterapi.dev/v1/tr7-jalal-blackweb/visits/up', {
+        signal: ctrl.signal,
+        cache: 'no-store'
+      });
+      clearTimeout(timeout);
+      if (!res.ok) throw new Error('API fail');
+      const data = await res.json();
+      const val = data.count ?? data.value ?? data.hits;
+      if (val != null) {
+        rollNumber(parseInt(val));
+        return;
+      }
+    } catch (e) {
+      clearTimeout(timeout);
+    }
+    // Fallback to localStorage
+    let stored = parseInt(localStorage.getItem(LS_KEY)) || 0;
+    stored++;
+    localStorage.setItem(LS_KEY, stored.toString());
+    rollNumber(stored);
   }
-  .link-card{
-    max-width:100%;
-    border-radius:16px;
+
+  tryFetch();
+
+  // Refresh every 30 seconds silently
+  setInterval(async () => {
+    try {
+      const res = await fetch('https://api.counterapi.dev/v1/tr7-jalal-blackweb/visits', { cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        const val = data.count ?? data.value;
+        if (val != null) {
+          const current = parseInt(visitCountEl.textContent?.replace(/[^0-9]/g, '') || '0');
+          if (parseInt(val) !== current) rollNumber(parseInt(val));
+        }
+      }
+    } catch (e) {}
+  }, 30000);
+}
+
+function rollNumber(target) {
+  if (!visitCountEl) return;
+  const from = parseInt(visitCountEl.textContent?.replace(/[^0-9]/g, '') || '0');
+  if (from === target) return;
+  const diff = target - from;
+  const steps = Math.min(Math.abs(diff), 60);
+  const interval = Math.max(16, Math.floor(700 / steps));
+  let i = 0;
+  const timer = setInterval(() => {
+    i++;
+    visitCountEl.textContent = Math.round(from + diff * i / steps).toLocaleString('en-US');
+    visitCountEl.style.transform = 'scale(1.25)';
+    setTimeout(() => visitCountEl.style.transform = 'scale(1)', 120);
+    if (i >= steps) {
+      clearInterval(timer);
+      visitCountEl.textContent = target.toLocaleString('en-US');
+    }
+  }, interval);
+}
+
+// ──────────────────────────────────────────────
+// 8. GSAP Cinematic Entrance & Link Rendering
+// ──────────────────────────────────────────────
+function renderLinks() {
+  if (!linksGrid) return;
+  const links = config.links || [];
+  linksGrid.innerHTML = links.map(link => `
+    <a href="${link.url}" target="_blank" rel="noopener noreferrer" class="link-card" data-id="${link.id}">
+      <div class="card-glow"></div>
+      <div class="card-sheen"></div>
+      <div class="link-icon-wrap">
+        <i class="${link.icon}" aria-hidden="true"></i>
+      </div>
+      <span class="link-name">${link.name}</span>
+      <span class="link-handle">${link.handle || ''}</span>
+    </a>
+  `).join('');
+}
+
+function revealPage() {
+  // Stagger animation for each major section
+  const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+  tl.to(mainWrapper, {
+    opacity: 1,
+    y: 0,
+    duration: 1.2,
+  })
+  .from('.hero-banner-frame', { scale: 0.96, y: 20, duration: 0.9 }, '-=0.8')
+  .from('.hero-avatar-anchor', { scale: 0.8, y: 30, duration: 0.8, ease: 'back.out(1.4)' }, '-=0.6')
+  .from('.hero-identity', { opacity: 0, y: 25, duration: 0.7 }, '-=0.5')
+  .from('.hero-bio-card', { opacity: 0, y: 30, scale: 0.98, duration: 0.8 }, '-=0.5')
+  .from('.links-header', { opacity: 0, y: 15, duration: 0.6 }, '-=0.4')
+  .from('.link-card', {
+    opacity: 0,
+    y: 40,
+    scale: 0.9,
+    stagger: { each: 0.08, from: 'start' },
+    duration: 0.7,
+    ease: 'back.out(1.2)'
+  }, '-=0.3')
+  .from('.site-footer', { opacity: 0, y: 20, duration: 0.7 }, '-=0.4');
+}
+
+// ──────────────────────────────────────────────
+// 9. Initialization Sequence
+// ──────────────────────────────────────────────
+async function boot() {
+  updatePreloaderText('INITIALIZING RENDERER');
+  
+  // Initialize Three.js
+  initThree();
+  
+  updatePreloaderText('ASSETS LOADED');
+
+  // Render links
+  renderLinks();
+  
+  // Start visitor counter
+  updateVisitorCount();
+
+  // Simulate a brief loading (for cinematic effect) then hide preloader
+  await new Promise(resolve => setTimeout(resolve, 800));
+  updatePreloaderText('SYSTEM READY');
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  hidePreloader();
+
+  // Reveal page with GSAP
+  revealPage();
+
+  // Enable gyroscope after page revealed & if mobile
+  if (mobileCheck()) {
+    // Request permission for iOS 13+ DeviceOrientation
+    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+      // We'll trigger on first touch (already done or we can add a button)
+      document.addEventListener('click', async () => {
+        try {
+          const permission = await DeviceOrientationEvent.requestPermission();
+          if (permission === 'granted') enableGyro();
+        } catch (e) {}
+      }, { once: true });
+    } else {
+      enableGyro();
+    }
   }
-  .hero-bio-card{
-    padding:0.9rem 1rem;
-  }
-  .footer-content{
-    flex-direction:column;
-    align-items:center;
-    text-align:center;
-  }
-  .footer-left{
-    flex-direction:column;
-    align-items:center;
-    gap:0.5rem;
+
+  // Event Listeners
+  window.addEventListener('mousemove', onMouseMove, { passive: true });
+  window.addEventListener('mouseleave', onMouseLeave);
+  window.addEventListener('touchmove', onTouchMove, { passive: true });
+  window.addEventListener('touchend', onTouchEnd);
+  window.addEventListener('resize', onResize);
+  
+  // Reduce motion fallback
+  const mqReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+  if (mqReducedMotion.matches) {
+    // Disable particle physics: just stop animating? We'll skip particle updates.
+    // Override animate to only render static scene.
   }
 }
 
-/* Utility: reduced motion */
-@media (prefers-reduced-motion: reduce){
-  *,
-  *::before,
-  *::after{
-    animation-duration:0.01ms!important;
-    animation-iteration-count:1!important;
-    transition-duration:0.01ms!important;
-  }
-}
-
-/* Focus styles */
-:focus-visible{
-  outline:2px solid var(--pri);
-  outline-offset:3px;
-  border-radius:4px;
+// Start everything when DOM ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', boot);
+} else {
+  boot();
 }
