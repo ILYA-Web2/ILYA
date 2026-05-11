@@ -58,8 +58,8 @@ body{
   flex-direction:column;
 }
 
-/* WebGL Canvas */
-#webgl-canvas{
+/* Fluid Canvas (Three.js) */
+#fluid-canvas{
   position:fixed;
   inset:0;
   z-index:0;
