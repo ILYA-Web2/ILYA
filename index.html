@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no">
-    <title>جلال — Web Engineer & UI Architect</title>
-    <meta name="description" content="مطور ويب متخصص في أنظمة تفاعلية عالية الأداء — Web Engineer & UI Architect">
+    <title>إيليا — Web Engineer & UI Architect</title>
+    <meta name="description" content="مطور ويب متخصص في أنظمة تفاعلية عالية الأداء — Ilya Web Engineer & UI Architect">
     <meta name="theme-color" content="#030000">
     <meta name="color-scheme" content="dark">
     <meta name="robots" content="index, follow">
-    <meta name="author" content="جلال">
+    <meta name="author" content="إيليا">
 
     <!-- Open Graph -->
-    <meta property="og:title" content="جلال — Web Engineer & UI Architect">
+    <meta property="og:title" content="إيليا — Web Engineer & UI Architect">
     <meta property="og:description" content="مطور ويب متخصص في أنظمة تفاعلية عالية الأداء">
     <meta property="og:image" content="https://iili.io/fb64ziv.md.jpg">
     <meta property="og:type" content="website">
@@ -21,39 +21,25 @@
     <!-- Preconnect -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://cdn.jsdelivr.net">
-    <link rel="preconnect" href="https://unpkg.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
 
-    <!-- Fonts: Arabic + Mono + Display -->
+    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Tajawal:wght@300;400;500;700;900&family=JetBrains+Mono:wght@300;400;600&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Font Awesome 6 -->
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-    <!-- Three.js Import Map -->
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-            }
-        }
-    </script>
-
-    <!-- GSAP + ScrollTrigger -->
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+    <!-- Three.js CDN (global) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- GSAP CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
     <!-- Stylesheet -->
     <link rel="stylesheet" href="style.css">
 
-    <!-- Inline Critical CSS (prevents FOUC) -->
+    <!-- Inline Critical CSS -->
     <style>
-        :root {
-            --bg: #030000;
-            --pri: #ff0033;
-            --white: #ffffff;
-        }
+        :root { --bg: #030000; --pri: #ff0033; --white: #ffffff; }
         *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
         html,body{
             min-height:100dvh;background:var(--bg);color:var(--white);
@@ -61,7 +47,7 @@
             -moz-osx-font-smoothing:grayscale;scroll-behavior:smooth;
             font-family:'Tajawal','Cairo',sans-serif;
         }
-        #fluid-canvas{
+        #webgl-canvas{
             position:fixed;inset:0;z-index:0;pointer-events:none;
             display:block;
         }
@@ -72,163 +58,96 @@
             cursor:wait;
         }
         #preloader.hidden{opacity:0;visibility:hidden;pointer-events:none}
-        .preloader-core{
-            position:relative;width:80px;height:80px;
-        }
         .preloader-ring{
-            position:absolute;inset:0;border-radius:50%;
-            border:2px solid transparent;
-            border-top-color:var(--pri);
-            animation:preSpin 1.2s cubic-bezier(.6,.2,.4,.8) infinite;
+            width:50px;height:50px;border:2px solid rgba(255,255,255,.1);
+            border-top:2px solid var(--pri);border-radius:50%;
+            animation:spin 1s linear infinite;
         }
-        .preloader-ring:nth-child(2){
-            inset:10px;border-top-color:rgba(255,255,255,.4);
-            animation-duration:1.8s;animation-direction:reverse;
-        }
-        .preloader-ring:nth-child(3){
-            inset:22px;border-top-color:rgba(255,0,51,.35);
-            animation-duration:2.4s;
-        }
-        @keyframes preSpin{to{transform:rotate(360deg)}}
-        .preloader-label{
-            font-family:'JetBrains Mono',monospace;font-size:0.7rem;
-            letter-spacing:4px;color:rgba(255,255,255,.5);
-            text-transform:uppercase;animation:prePulse 2s ease-in-out infinite;
-        }
-        @keyframes prePulse{0%,100%{opacity:.4}50%{opacity:1}}
+        @keyframes spin{to{transform:rotate(360deg)}}
         .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
     </style>
 </head>
 <body>
 
-    <!-- ═══════════════════════════════════════
-    PRELOADER — Cinematic
-    ═══════════════════════════════════════ -->
+    <!-- Preloader -->
     <div id="preloader" role="status" aria-label="جاري التحميل">
-        <div class="preloader-core" aria-hidden="true">
-            <div class="preloader-ring"></div>
-            <div class="preloader-ring"></div>
-            <div class="preloader-ring"></div>
-        </div>
-        <span class="preloader-label" id="preloader-text">INITIALIZING</span>
+        <div class="preloader-ring"></div>
+        <div style="font-family:'JetBrains Mono';font-size:0.7rem;letter-spacing:3px;color:rgba(255,255,255,.5)">INITIALIZING</div>
     </div>
 
-    <!-- ═══════════════════════════════════════
-    FLUID CANVAS — Advanced WebGL Fluid Simulation
-    ═══════════════════════════════════════ -->
-    <canvas id="fluid-canvas" aria-hidden="true"></canvas>
+    <!-- WebGL Canvas -->
+    <canvas id="webgl-canvas" aria-hidden="true"></canvas>
 
-    <!-- ═══════════════════════════════════════
-    MAIN CONTENT
-    ═══════════════════════════════════════ -->
+    <!-- Main Content -->
     <main id="main-content" class="main-wrapper">
 
-        <!-- ── HERO SECTION ── -->
-        <section class="hero-section" id="hero">
+        <!-- Hero Section -->
+        <section class="hero-section">
             <div class="hero-inner">
-
-                <!-- Banner Image -->
-                <div class="hero-banner-frame" id="banner-frame">
-                    <div class="hero-banner-glow" aria-hidden="true"></div>
-                    <img
-                        src="https://iili.io/fb6SvS9.md.jpg"
-                        alt="غلاف"
-                        class="hero-banner-img"
-                        id="banner-img"
-                        loading="eager"
-                        fetchpriority="high"
-                    >
-                    <div class="hero-banner-vignette" aria-hidden="true"></div>
-                    <div class="hero-banner-scanline" aria-hidden="true"></div>
+                <!-- Banner -->
+                <div class="banner-frame" id="banner-frame">
+                    <img src="https://iili.io/fb6SvS9.md.jpg" alt="غلاف" class="banner-img" loading="eager">
+                    <div class="banner-vignette"></div>
                 </div>
 
-                <!-- Profile Image -->
-                <div class="hero-avatar-anchor" id="avatar-anchor">
-                    <div class="hero-avatar-frame" id="avatar-frame">
-                        <div class="hero-avatar-orbit" aria-hidden="true">
-                            <svg viewBox="0 0 200 200" class="orbit-svg">
-                                <defs>
-                                    <linearGradient id="orbGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                        <stop offset="0%" stop-color="#ff0033" stop-opacity="0"/>
-                                        <stop offset="50%" stop-color="#ff0033" stop-opacity="1"/>
-                                        <stop offset="100%" stop-color="#ffffff" stop-opacity="0.8"/>
-                                    </linearGradient>
-                                </defs>
-                                <circle cx="100" cy="100" r="90" fill="none" stroke="url(#orbGrad)" stroke-width="2" stroke-dasharray="60 505" stroke-linecap="round"/>
-                            </svg>
-                        </div>
-                        <div class="hero-avatar-aura" aria-hidden="true"></div>
-                        <img
-                            src="https://iili.io/fb64ziv.md.jpg"
-                            alt="جلال"
-                            class="hero-avatar-img"
-                            id="avatar-img"
-                            loading="eager"
-                        >
+                <!-- Avatar -->
+                <div class="avatar-anchor">
+                    <div class="avatar-frame" id="avatar-frame">
+                        <div class="avatar-orbit"></div>
+                        <img src="https://iili.io/fb64ziv.md.jpg" alt="إيليا" class="avatar-img" loading="eager">
                     </div>
                 </div>
 
-                <!-- Name & Title -->
-                <div class="hero-identity">
-                    <h1 class="hero-name" id="hero-name">
-                        <span class="hero-name-text">جلال</span>
-                        <span class="hero-name-underline" aria-hidden="true"></span>
+                <!-- Identity -->
+                <div class="identity">
+                    <h1 class="name" id="hero-name">
+                        <span class="name-text rgb-animate">إيليا</span>
+                        <span class="name-sub">ILYA</span>
                     </h1>
-                    <p class="hero-title" id="hero-title">
-                        <span class="hero-title-bracket" aria-hidden="true">[</span>
-                        <span class="hero-title-words">Web Engineer &amp; UI Architect</span>
-                        <span class="hero-title-bracket" aria-hidden="true">]</span>
+                    <p class="title">
+                        <span class="title-bracket">[</span>
+                        <span>Web Engineer &amp; UI Architect</span>
+                        <span class="title-bracket">]</span>
                     </p>
                 </div>
 
                 <!-- Bio Card -->
-                <div class="hero-bio-card" id="bio-card">
-                    <div class="bio-card-border" aria-hidden="true"></div>
-                    <div class="bio-card-grain" aria-hidden="true"></div>
-                    <p class="hero-bio-text" id="bio-text">
-                        مطور ويب محترف ومتخصص في دمج حلول الذكاء الاصطناعي مع تطبيقات الويب الحديثة. أمتلك خبرة عميقة في بناء أنظمة تفاعلية عالية الأداء تركز على تجربة المستخدم، وتوظيف تقنيات AI/ML لتقديم تجارب استثنائية. أؤمن بأن الجماليات والوظائف يجب أن تعمل بتناغم تام لخلق منتج رقمي لا يُنسى.
+                <div class="bio-card glass">
+                    <p class="bio-text">
+                        مطور ويب محترف ومتخصص في دمج حلول الذكاء الاصطناعي مع تطبيقات الويب الحديثة. أمتلك خبرة عميقة في بناء أنظمة تفاعلية عالية الأداء تركز على تجربة المستخدم، وتوظيف تقنيات AI/ML لتقديم تجارب استثنائية.
                     </p>
                 </div>
-
             </div>
         </section>
 
-        <!-- ── LINKS SECTION ── -->
-        <section class="links-section" id="connect">
-            <div class="links-header">
-                <span class="links-header-line" aria-hidden="true"></span>
-                <h2 class="links-header-title" id="section-title">تواصل</h2>
-                <span class="links-header-line" aria-hidden="true"></span>
-            </div>
+        <!-- Links Section -->
+        <section class="links-section">
+            <h2 class="section-title">
+                <span class="title-line"></span>
+                <span>تواصل</span>
+                <span class="title-line"></span>
+            </h2>
             <div class="links-grid" id="links-grid">
-                <!-- Populated by JS from embedded data -->
+                <!-- JS will populate from config -->
             </div>
         </section>
 
-        <!-- ── FOOTER ── -->
-        <footer class="site-footer" id="footer">
-            <div class="footer-divider" aria-hidden="true">
-                <span class="footer-divider-line"></span>
-                <span class="footer-divider-gem">◆</span>
-                <span class="footer-divider-line"></span>
+        <!-- Footer -->
+        <footer class="site-footer">
+            <div class="footer-divider">
+                <span class="divider-line"></span>
+                <span class="divider-gem">◆</span>
+                <span class="divider-line"></span>
             </div>
             <div class="footer-content">
-                <div class="footer-left">
-                    <span class="footer-copy" id="footer-copy">© 2026 جلال — جميع الحقوق محفوظة</span>
-                    <div class="footer-visitor-badge" id="visitor-badge">
-                        <i class="fas fa-eye" aria-hidden="true"></i>
-                        <span id="visit-count" class="visit-count">0</span>
-                        <span class="visit-label">VISITS</span>
-                    </div>
+                <span class="footer-copy">© 2026 إيليا — جميع الحقوق محفوظة</span>
+                <div class="visitor-badge" id="visitor-badge">
+                    <i class="fas fa-eye"></i>
+                    <span id="visit-count">0</span>
+                    <span>VISITS</span>
                 </div>
-                <a
-                    href="https://black3web.github.io/Blackweb/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="footer-url"
-                    id="footer-url"
-                >
-                    <span class="footer-url-arrow">⟶</span>
+                <a href="https://black3web.github.io/Blackweb/" target="_blank" rel="noopener" class="footer-url">
+                    <span class="url-arrow">⟶</span>
                     <span>black3web.github.io/Blackweb</span>
                 </a>
             </div>
@@ -236,93 +155,39 @@
 
     </main>
 
-    <!-- ═══════════════════════════════════════
-    HIDDEN CONFIG — Data extracted from old site
-    ═══════════════════════════════════════ -->
+    <!-- Data Configuration (extracted from original) -->
     <script id="site-config" type="application/json">
         {
             "profile": {
-                "name": "جلال",
+                "name": "إيليا",
+                "nameEn": "ILYA",
                 "title": "Web Engineer & UI Architect",
-                "description": "مطور ويب محترف ومتخصص في دمج حلول الذكاء الاصطناعي مع تطبيقات الويب الحديثة. أمتلك خبرة عميقة في بناء أنظمة تفاعلية عالية الأداء تركز على تجربة المستخدم، وتوظيف تقنيات AI/ML لتقديم تجارب استثنائية. أؤمن بأن الجماليات والوظائف يجب أن تعمل بتناغم تام لخلق منتج رقمي لا يُنسى.",
-                "bracketOpen": "[",
-                "bracketClose": "]"
+                "description": "مطور ويب محترف ومتخصص في دمج حلول الذكاء الاصطناعي مع تطبيقات الويب الحديثة. أمتلك خبرة عميقة في بناء أنظمة تفاعلية عالية الأداء تركز على تجربة المستخدم، وتوظيف تقنيات AI/ML لتقديم تجارب استثنائية."
             },
             "branding": {
-                "logoUrl": "https://iili.io/qWN5VvR.md.jpg",
                 "bannerUrl": "https://iili.io/fb6SvS9.md.jpg",
-                "profileUrl": "https://iili.io/fb64ziv.md.jpg",
+                "avatarUrl": "https://iili.io/fb64ziv.md.jpg",
                 "siteUrl": "https://black3web.github.io/Blackweb/",
-                "siteLabel": "black3web.github.io/Blackweb",
-                "loaderBrand": "TR7"
+                "siteLabel": "black3web.github.io/Blackweb"
             },
             "colors": {
                 "bg": "#030000",
                 "primary": "#ff0033",
-                "primaryDeep": "#cc001a",
-                "primaryDark": "#8b0000",
                 "accent": "#ff1744",
-                "text": "#ffffff",
-                "cardBg": "rgba(5,1,2,0.60)",
-                "border": "rgba(255,0,51,0.18)"
-            },
-            "texts": {
-                "sectionTitle": "تواصل",
-                "footerCopy": "© 2026 جلال — جميع الحقوق محفوظة",
-                "footerVisLabel": "VISITS",
-                "footerGem": "◆",
-                "loaderBrand": "TR7"
+                "text": "#ffffff"
             },
             "links": [
-                {
-                    "id": "lnk-1",
-                    "name": "GitHub",
-                    "url": "https://github.com",
-                    "icon": "fa-brands fa-github",
-                    "handle": "@github"
-                },
-                {
-                    "id": "lnk-2",
-                    "name": "Email",
-                    "url": "mailto:contact@black3web.dev",
-                    "icon": "fa-solid fa-envelope",
-                    "handle": "contact@"
-                },
-                {
-                    "id": "lnk-3",
-                    "name": "LinkedIn",
-                    "url": "https://linkedin.com",
-                    "icon": "fa-brands fa-linkedin-in",
-                    "handle": "@linkedin"
-                },
-                {
-                    "id": "lnk-4",
-                    "name": "WhatsApp",
-                    "url": "https://wa.me/",
-                    "icon": "fa-brands fa-whatsapp",
-                    "handle": "WhatsApp"
-                },
-                {
-                    "id": "lnk-5",
-                    "name": "Telegram",
-                    "url": "https://t.me/",
-                    "icon": "fa-brands fa-telegram-plane",
-                    "handle": "@telegram"
-                },
-                {
-                    "id": "lnk-6",
-                    "name": "X (Twitter)",
-                    "url": "https://x.com",
-                    "icon": "fa-brands fa-x-twitter",
-                    "handle": "@x"
-                }
+                {"id":"lnk1","name":"GitHub","url":"https://github.com/","icon":"fa-brands fa-github"},
+                {"id":"lnk2","name":"Email","url":"mailto:contact@black3web.dev","icon":"fa-solid fa-envelope"},
+                {"id":"lnk3","name":"LinkedIn","url":"https://linkedin.com/","icon":"fa-brands fa-linkedin-in"},
+                {"id":"lnk4","name":"WhatsApp","url":"https://wa.me/","icon":"fa-brands fa-whatsapp"},
+                {"id":"lnk5","name":"Telegram","url":"https://t.me/","icon":"fa-brands fa-telegram-plane"},
+                {"id":"lnk6","name":"X (Twitter)","url":"https://x.com/","icon":"fa-brands fa-x-twitter"}
             ]
         }
     </script>
 
-    <!-- ═══════════════════════════════════════
-    SCRIPTS
-    ═══════════════════════════════════════ -->
-    <script src="main.js" type="module"></script>
+    <!-- Main Script -->
+    <script src="main.js"></script>
 </body>
 </html>
