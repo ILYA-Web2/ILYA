@@ -1,436 +1,55 @@
 /* ═══════════════════════════════════════════════════════════
-   TR7 · main.js — Interactive Neon Fluid Background
-   Three.js + GSAP + Cinematic Entrance + Visitor Counter
+   TR7 · main.js — Real-time GPU Fluid Simulation
+   Neon Metaballs · Cinematic Entrance · Visitor Counter
+   No Admin Panel · Mobile-First 60fps
    ═══════════════════════════════════════════════════════════ */
 
 import * as THREE from 'three';
 
 // ──────────────────────────────────────────────
-// 1. DOM References & Config
+// 1. Site Config (extracted safety)
 // ──────────────────────────────────────────────
-const preloader       = document.getElementById('preloader');
-const preloaderText   = document.getElementById('preloader-text');
-const mainWrapper     = document.getElementById('main-content');
-const linksGrid       = document.getElementById('links-grid');
-const visitCountEl    = document.getElementById('visit-count');
-const canvas          = document.getElementById('webgl-canvas');
-
-let config;
-try {
-  config = JSON.parse(document.getElementById('site-config').textContent);
-} catch (e) {
-  console.error('Invalid site config');
-  config = { profile:{}, branding:{}, colors:{}, texts:{}, links:[] };
-}
+const config = JSON.parse(document.getElementById('site-config').textContent);
+const { profile, branding, colors, texts, links } = config;
 
 // ──────────────────────────────────────────────
-// 2. Utility Functions
+// 2. DOM Elements
 // ──────────────────────────────────────────────
+const preloader      = document.getElementById('preloader');
+const preloaderText  = document.getElementById('preloader-text');
+const mainWrapper    = document.getElementById('main-content');
+const linksGrid      = document.getElementById('links-grid');
+const visitCountEl   = document.getElementById('visit-count');
+const canvas         = document.getElementById('fluid-canvas');
+
+// ──────────────────────────────────────────────
+// 3. Utility Functions
+// ──────────────────────────────────────────────
+const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth < 640;
 const W = () => window.innerWidth;
 const H = () => window.innerHeight;
-const DPR = () => Math.min(window.devicePixelRatio, 2); // cap for performance
+const DPR = () => Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2);
 
 // ──────────────────────────────────────────────
-// 3. Preloader Management
+// 4. Preloader Management
 // ──────────────────────────────────────────────
-const hidePreloader = () => {
-  preloader.classList.add('hidden');
-  setTimeout(() => {
-    preloader.style.display = 'none';
-  }, 800);
-};
-
-// Update preloader text to show progress (fake stages)
 const updatePreloaderText = (msg) => {
   if (preloaderText) preloaderText.textContent = msg;
 };
 
-// ──────────────────────────────────────────────
-// 4. Three.js Scene Setup
-// ──────────────────────────────────────────────
-let scene, camera, renderer;
-let fluidParticles; // our interactive particle system
-let mouse = new THREE.Vector2(0.5, 0.5);          // normalized screen coords
-let targetMouse = new THREE.Vector2(0.5, 0.5);
-let mouseInfluence = false;
-let clock = new THREE.Clock();
-
-// Particle system parameters
-const PARTICLE_COUNT  = mobileCheck() ? 160 : 280;
-const GRID_COLS       = mobileCheck() ? 16 : 20;
-const GRID_ROWS       = Math.ceil(PARTICLE_COUNT / GRID_COLS);
-const SPACING         = 1.0; // base spacing in world units (will be scaled)
-const RESTITUTION     = 0.08; // return to original position strength
-const REPULSION       = 1.5; // mouse repulsion strength
-const MAX_FORCE       = 0.4;
-const DAMPING         = 0.92;
-
-// Original grid positions (rest positions)
-let originalPositions = new Float32Array(PARTICLE_COUNT * 3);
-// Current positions & velocities
-let positions = new Float32Array(PARTICLE_COUNT * 3);
-let velocities = new Float32Array(PARTICLE_COUNT * 3);
-
-// Sprite texture for glowing point
-let glowTexture;
-
-function mobileCheck() {
-  return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || window.innerWidth < 640;
-}
-
-function initThree() {
-  // Renderer
-  renderer = new THREE.WebGLRenderer({ 
-    canvas,
-    alpha: false,
-    antialias: false,
-    powerPreference: 'high-performance'
-  });
-  renderer.setPixelRatio(DPR());
-  renderer.setSize(W(), H());
-  renderer.setClearColor(new THREE.Color(config.colors.bg || '#030000'));
-
-  // Scene & Camera (orthographic)
-  scene = new THREE.Scene();
-  const aspect = W() / H();
-  const viewSize = 10; // world units height
-  camera = new THREE.OrthographicCamera(-viewSize * aspect, viewSize * aspect, viewSize, -viewSize, 0.1, 100);
-  camera.position.z = 5;
-
-  // Generate glow texture via canvas
-  glowTexture = createGlowTexture();
-
-  // Create particle system
-  createParticleSystem();
-
-  // Add ambient neon ring (decorative)
-  addNeonRing();
-
-  // Start render loop
-  animate();
-}
-
-function createGlowTexture() {
-  const size = 64;
-  const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = size;
-  const ctx = canvas.getContext('2d');
-  const gradient = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
-  gradient.addColorStop(0, 'rgba(255, 50, 80, 1)');
-  gradient.addColorStop(0.2, 'rgba(255, 0, 51, 0.9)');
-  gradient.addColorStop(0.5, 'rgba(200, 0, 30, 0.4)');
-  gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, size, size);
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.needsUpdate = true;
-  return texture;
-}
-
-function createParticleSystem() {
-  // Populate original grid positions
-  const cols = GRID_COLS;
-  const rows = GRID_ROWS;
-  const spacing = SPACING;
-  const offsetX = (cols - 1) * spacing * 0.5;
-  const offsetY = (rows - 1) * spacing * 0.5;
-  
-  let idx = 0;
-  for (let i = 0; i < rows; i++) {
-    for (let j = 0; j < cols; j++) {
-      if (idx >= PARTICLE_COUNT) break;
-      const x = j * spacing - offsetX;
-      const y = i * spacing - offsetY;
-      originalPositions[idx * 3]     = x;
-      originalPositions[idx * 3 + 1] = y;
-      originalPositions[idx * 3 + 2] = 0;
-      positions[idx * 3]     = x;
-      positions[idx * 3 + 1] = y;
-      positions[idx * 3 + 2] = 0;
-      velocities[idx * 3]     = 0;
-      velocities[idx * 3 + 1] = 0;
-      velocities[idx * 3 + 2] = 0;
-      idx++;
-    }
-  }
-
-  // Geometry & Material
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  // Custom sizes for each particle (based on distance to mouse? we'll update in loop)
-  geometry.setAttribute('size', new THREE.BufferAttribute(new Float32Array(PARTICLE_COUNT), 1));
-  geometry.setAttribute('alpha', new THREE.BufferAttribute(new Float32Array(PARTICLE_COUNT), 1));
-  
-  const material = new THREE.ShaderMaterial({
-    uniforms: {
-      uTexture: { value: glowTexture },
-      uTime:    { value: 0 }
-    },
-    vertexShader: /* glsl */ `
-      attribute float size;
-      attribute float alpha;
-      varying float vAlpha;
-      void main() {
-        vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-        gl_PointSize = size * (300.0 / -mvPosition.z); // adjust for perspective? ortho so constant factor
-        gl_Position = projectionMatrix * mvPosition;
-        vAlpha = alpha;
-      }
-    `,
-    fragmentShader: /* glsl */ `
-      varying float vAlpha;
-      uniform sampler2D uTexture;
-      void main() {
-        vec4 texColor = texture2D(uTexture, gl_PointCoord);
-        gl_FragColor = vec4(texColor.rgb, texColor.a * vAlpha);
-      }
-    `,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false,
-    depthTest: false,
-    transparent: true
-  });
-
-  fluidParticles = new THREE.Points(geometry, material);
-  scene.add(fluidParticles);
-
-  // Initial alpha/size
-  updateParticleAttributes();
-}
-
-// Add a subtle rotating neon ring behind particles
-function addNeonRing() {
-  const ringGeo = new THREE.TorusGeometry(4.5, 0.02, 16, 100);
-  const ringMat = new THREE.MeshBasicMaterial({
-    color: new THREE.Color(config.colors.primary || '#ff0033'),
-    transparent: true,
-    opacity: 0.15,
-    blending: THREE.AdditiveBlending,
-    depthTest: false,
-    depthWrite: false
-  });
-  const ring = new THREE.Mesh(ringGeo, ringMat);
-  ring.rotation.x = Math.PI / 2;
-  ring.position.z = -1;
-  scene.add(ring);
-  // Rotate slowly
-  ring.userData = { speed: 0.1 };
-  // We'll update rotation in loop
-  fluidParticles.userData = { ring };
-}
+const hidePreloader = async () => {
+  preloader.classList.add('hidden');
+  await new Promise(r => setTimeout(r, 800));
+  preloader.style.display = 'none';
+};
 
 // ──────────────────────────────────────────────
-// 5. Animation Loop & Particle Physics
-// ──────────────────────────────────────────────
-function animate() {
-  requestAnimationFrame(animate);
-
-  const dt = Math.min(clock.getDelta(), 0.1); // cap dt
-  // Smooth mouse movement
-  mouse.lerp(targetMouse, 0.1);
-  
-  // Update particle positions based on mouse influence
-  updateParticles(dt, mouse);
-
-  // Update ring rotation
-  if (fluidParticles.userData.ring) {
-    fluidParticles.userData.ring.rotation.z += fluidParticles.userData.ring.userData.speed * dt;
-  }
-
-  // Update shader time uniform (optional)
-  if (fluidParticles.material.uniforms) {
-    fluidParticles.material.uniforms.uTime.value += dt;
-  }
-
-  renderer.render(scene, camera);
-}
-
-function updateParticles(dt, currentMouse) {
-  const cols = GRID_COLS;
-  const rows = GRID_ROWS;
-  const spacing = SPACING;
-  const offsetX = (cols - 1) * spacing * 0.5;
-  const offsetY = (rows - 1) * spacing * 0.5;
-  
-  // Convert mouse to world coordinates (mapping [0,1] to world range)
-  // Ortho camera: left = -viewSize*aspect, right = +viewSize*aspect, top = viewSize, bottom = -viewSize
-  const viewAspect = W() / H();
-  const worldWidth = 10 * viewAspect;
-  const worldHeight = 10;
-  const mx = (currentMouse.x - 0.5) * worldWidth;
-  const my = (0.5 - currentMouse.y) * worldHeight; // flip Y
-
-  const sizes = new Float32Array(PARTICLE_COUNT);
-  const alphas = new Float32Array(PARTICLE_COUNT);
-
-  for (let i = 0; i < PARTICLE_COUNT; i++) {
-    const i3 = i * 3;
-    const ox = originalPositions[i3];
-    const oy = originalPositions[i3 + 1];
-    let px = positions[i3];
-    let py = positions[i3 + 1];
-    let vx = velocities[i3];
-    let vy = velocities[i3 + 1];
-
-    // Force towards original position (elastic)
-    const dxOrigin = ox - px;
-    const dyOrigin = oy - py;
-    vx += dxOrigin * RESTITUTION;
-    vy += dyOrigin * RESTITUTION;
-
-    // Mouse repulsion (if mouseInfluence)
-    if (mouseInfluence) {
-      const dxMouse = px - mx;
-      const dyMouse = py - my;
-      const distMouse = Math.sqrt(dxMouse * dxMouse + dyMouse * dyMouse) + 0.01;
-      const forceMag = REPULSION / (distMouse * distMouse + 0.8);
-      const forceX = (dxMouse / distMouse) * forceMag;
-      const forceY = (dyMouse / distMouse) * forceMag;
-      vx += forceX;
-      vy += forceY;
-    }
-
-    // Clamp force
-    const speed = Math.sqrt(vx * vx + vy * vy);
-    if (speed > MAX_FORCE) {
-      vx = (vx / speed) * MAX_FORCE;
-      vy = (vy / speed) * MAX_FORCE;
-    }
-
-    // Damping
-    vx *= DAMPING;
-    vy *= DAMPING;
-
-    // Update position
-    px += vx * dt * 2.5; // speed factor
-    py += vy * dt * 2.5;
-
-    // Store back
-    positions[i3]     = px;
-    positions[i3 + 1] = py;
-    velocities[i3]    = vx;
-    velocities[i3 + 1] = vy;
-
-    // Compute size & alpha based on velocity / distance from origin
-    const distOrigin = Math.sqrt(dxOrigin * dxOrigin + dyOrigin * dyOrigin);
-    const vel = Math.sqrt(vx * vx + vy * vy);
-    const size = 0.08 + vel * 2.5;
-    const alpha = 0.4 + vel * 4.0;
-    sizes[i] = size;
-    alphas[i] = Math.min(alpha, 1.0);
-  }
-
-  // Update geometry attributes
-  fluidParticles.geometry.attributes.position.needsUpdate = true;
-  fluidParticles.geometry.attributes.size.array.set(sizes);
-  fluidParticles.geometry.attributes.size.needsUpdate = true;
-  fluidParticles.geometry.attributes.alpha.array.set(alphas);
-  fluidParticles.geometry.attributes.alpha.needsUpdate = true;
-}
-
-// ──────────────────────────────────────────────
-// 6. Event Handlers (Mouse, Touch, Gyro, Resize)
-// ──────────────────────────────────────────────
-function onMouseMove(e) {
-  targetMouse.x = e.clientX / W();
-  targetMouse.y = e.clientY / H();
-  mouseInfluence = true;
-}
-function onMouseLeave() {
-  mouseInfluence = false;
-  targetMouse.set(0.5, 0.5);
-}
-function onTouchMove(e) {
-  if (e.touches.length) {
-    targetMouse.x = e.touches[0].clientX / W();
-    targetMouse.y = e.touches[0].clientY / H();
-    mouseInfluence = true;
-  }
-}
-function onTouchEnd() {
-  mouseInfluence = false;
-  targetMouse.set(0.5, 0.5);
-}
-
-// Gyroscope parallax (mobile)
-let gyroEnabled = false;
-function enableGyro() {
-  if (window.DeviceOrientationEvent && !gyroEnabled) {
-    window.addEventListener('deviceorientation', (e) => {
-      if (!mouseInfluence) { // only if not touching
-        const x = e.gamma / 45; // -1 to 1
-        const y = e.beta  / 45;
-        targetMouse.x = THREE.MathUtils.clamp((x + 1) / 2, 0, 1);
-        targetMouse.y = THREE.MathUtils.clamp((y + 1) / 2, 0, 1);
-      }
-    }, true);
-    gyroEnabled = true;
-  }
-}
-
-function onResize() {
-  renderer.setSize(W(), H());
-  const aspect = W() / H();
-  camera.left = -5 * aspect;
-  camera.right = 5 * aspect;
-  camera.top = 5;
-  camera.bottom = -5;
-  camera.updateProjectionMatrix();
-}
-
-// ──────────────────────────────────────────────
-// 7. Visitor Counter (API + localStorage fallback)
+// 5. Visitor Counter (API + localStorage fallback)
 // ──────────────────────────────────────────────
 const LS_KEY = 'tr7_lv_v2';
-
-async function updateVisitorCount() {
-  async function tryFetch() {
-    const ctrl = new AbortController();
-    const timeout = setTimeout(() => ctrl.abort(), 4000);
-    try {
-      const res = await fetch('https://api.counterapi.dev/v1/tr7-jalal-blackweb/visits/up', {
-        signal: ctrl.signal,
-        cache: 'no-store'
-      });
-      clearTimeout(timeout);
-      if (!res.ok) throw new Error('API fail');
-      const data = await res.json();
-      const val = data.count ?? data.value ?? data.hits;
-      if (val != null) {
-        rollNumber(parseInt(val));
-        return;
-      }
-    } catch (e) {
-      clearTimeout(timeout);
-    }
-    // Fallback to localStorage
-    let stored = parseInt(localStorage.getItem(LS_KEY)) || 0;
-    stored++;
-    localStorage.setItem(LS_KEY, stored.toString());
-    rollNumber(stored);
-  }
-
-  tryFetch();
-
-  // Refresh every 30 seconds silently
-  setInterval(async () => {
-    try {
-      const res = await fetch('https://api.counterapi.dev/v1/tr7-jalal-blackweb/visits', { cache: 'no-store' });
-      if (res.ok) {
-        const data = await res.json();
-        const val = data.count ?? data.value;
-        if (val != null) {
-          const current = parseInt(visitCountEl.textContent?.replace(/[^0-9]/g, '') || '0');
-          if (parseInt(val) !== current) rollNumber(parseInt(val));
-        }
-      }
-    } catch (e) {}
-  }, 30000);
-}
-
 function rollNumber(target) {
   if (!visitCountEl) return;
-  const from = parseInt(visitCountEl.textContent?.replace(/[^0-9]/g, '') || '0');
+  const from = parseInt(visitCountEl.textContent.replace(/[^0-9]/g, '')) || 0;
   if (from === target) return;
   const diff = target - from;
   const steps = Math.min(Math.abs(diff), 60);
@@ -448,12 +67,49 @@ function rollNumber(target) {
   }, interval);
 }
 
+async function updateVisitorCount() {
+  const tryFetch = async () => {
+    const ctrl = new AbortController();
+    const timeout = setTimeout(() => ctrl.abort(), 4000);
+    try {
+      const res = await fetch('https://api.counterapi.dev/v1/tr7-jalal-blackweb/visits/up', {
+        signal: ctrl.signal,
+        cache: 'no-store'
+      });
+      clearTimeout(timeout);
+      if (!res.ok) throw new Error('API fail');
+      const data = await res.json();
+      const val = data.count ?? data.value ?? data.hits;
+      if (val != null) rollNumber(parseInt(val));
+      return;
+    } catch (e) { clearTimeout(timeout); }
+    // Fallback
+    let stored = parseInt(localStorage.getItem(LS_KEY)) || 0;
+    stored++;
+    localStorage.setItem(LS_KEY, stored.toString());
+    rollNumber(stored);
+  };
+  await tryFetch();
+  setInterval(async () => {
+    try {
+      const res = await fetch('https://api.counterapi.dev/v1/tr7-jalal-blackweb/visits', { cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        const val = data.count ?? data.value;
+        if (val != null) {
+          const cur = parseInt(visitCountEl.textContent.replace(/[^0-9]/g, '')) || 0;
+          if (parseInt(val) !== cur) rollNumber(parseInt(val));
+        }
+      }
+    } catch (e) {}
+  }, 30000);
+}
+
 // ──────────────────────────────────────────────
-// 8. GSAP Cinematic Entrance & Link Rendering
+// 6. Render Links from Config
 // ──────────────────────────────────────────────
 function renderLinks() {
   if (!linksGrid) return;
-  const links = config.links || [];
   linksGrid.innerHTML = links.map(link => `
     <a href="${link.url}" target="_blank" rel="noopener noreferrer" class="link-card" data-id="${link.id}">
       <div class="card-glow"></div>
@@ -467,91 +123,457 @@ function renderLinks() {
   `).join('');
 }
 
-function revealPage() {
-  // Stagger animation for each major section
-  const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-  tl.to(mainWrapper, {
-    opacity: 1,
-    y: 0,
-    duration: 1.2,
-  })
-  .from('.hero-banner-frame', { scale: 0.96, y: 20, duration: 0.9 }, '-=0.8')
-  .from('.hero-avatar-anchor', { scale: 0.8, y: 30, duration: 0.8, ease: 'back.out(1.4)' }, '-=0.6')
-  .from('.hero-identity', { opacity: 0, y: 25, duration: 0.7 }, '-=0.5')
-  .from('.hero-bio-card', { opacity: 0, y: 30, scale: 0.98, duration: 0.8 }, '-=0.5')
-  .from('.links-header', { opacity: 0, y: 15, duration: 0.6 }, '-=0.4')
-  .from('.link-card', {
-    opacity: 0,
-    y: 40,
-    scale: 0.9,
-    stagger: { each: 0.08, from: 'start' },
-    duration: 0.7,
-    ease: 'back.out(1.2)'
-  }, '-=0.3')
-  .from('.site-footer', { opacity: 0, y: 20, duration: 0.7 }, '-=0.4');
-}
-
 // ──────────────────────────────────────────────
-// 9. Initialization Sequence
+// 7. GPU Fluid Simulation Engine (Ultra-Realistic Neon Fluid)
+// Uses the Navier-Stokes based approach on GPU with custom shaders
+// Adapted to Three.js with multiple Render Targets
 // ──────────────────────────────────────────────
-async function boot() {
-  updatePreloaderText('INITIALIZING RENDERER');
-  
-  // Initialize Three.js
-  initThree();
-  
-  updatePreloaderText('ASSETS LOADED');
+class FluidEngine {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.dpr = DPR();
+    this.width = Math.floor(W() * this.dpr);
+    this.height = Math.floor(H() * this.dpr);
+    this.mouse = new THREE.Vector2(-1, -1); // in [0,1] normalized, -1 means off
+    this.prevMouse = new THREE.Vector2(-1, -1);
+    this.densityDissipation = 0.98;
+    this.velocityDissipation = 0.99;
+    this.pressureIterations = 25;
+    this.curlStrength = 5.0;
+    this.splatRadius = 0.2;
+    this.splatForce = 6000;
 
-  // Render links
-  renderLinks();
-  
-  // Start visitor counter
-  updateVisitorCount();
+    // Three.js core
+    this.renderer = new THREE.WebGLRenderer({ canvas, alpha: false, antialias: false, powerPreference: 'high-performance' });
+    this.renderer.setPixelRatio(this.dpr);
+    this.renderer.setSize(W(), H(), false);
+    this.renderer.setClearColor(new THREE.Color(colors.bg || '#030000'));
+    this.renderer.outputColorSpace = THREE.SRGBColorSpace;
 
-  // Simulate a brief loading (for cinematic effect) then hide preloader
-  await new Promise(resolve => setTimeout(resolve, 800));
-  updatePreloaderText('SYSTEM READY');
-  await new Promise(resolve => setTimeout(resolve, 500));
-  
-  hidePreloader();
+    this.scene = new THREE.Scene();
+    this.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 
-  // Reveal page with GSAP
-  revealPage();
+    // Fullscreen quad to display final density
+    this.createDisplayQuad();
 
-  // Enable gyroscope after page revealed & if mobile
-  if (mobileCheck()) {
-    // Request permission for iOS 13+ DeviceOrientation
-    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-      // We'll trigger on first touch (already done or we can add a button)
-      document.addEventListener('click', async () => {
-        try {
-          const permission = await DeviceOrientationEvent.requestPermission();
-          if (permission === 'granted') enableGyro();
-        } catch (e) {}
-      }, { once: true });
-    } else {
-      enableGyro();
+    // Simulation buffers (render targets)
+    this.initSimulationBuffers();
+    this.initSimulationShaders();
+
+    // Start with a few initial splats to fill the screen
+    this.splat(0.5, 0.5, 0, 0, [1,1,0]); // just a dummy to initialize?
+
+    this.clock = new THREE.Clock();
+    this.animate();
+  }
+
+  createDisplayQuad() {
+    const geometry = new THREE.PlaneGeometry(2, 2);
+    // The display shader will sample density texture and apply neon mapping
+    const material = new THREE.ShaderMaterial({
+      uniforms: {
+        uDensity: { value: null },
+        uTime: { value: 0 }
+      },
+      vertexShader: /* glsl */ `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: /* glsl */ `
+        varying vec2 vUv;
+        uniform sampler2D uDensity;
+        uniform float uTime;
+        void main() {
+          vec4 density = texture2D(uDensity, vUv);
+          // density.r = scalar, map to neon red gradient
+          float d = clamp(density.r, 0.0, 1.0);
+          // Core neon color
+          vec3 col = mix(vec3(0.02, 0.0, 0.0), vec3(1.0, 0.0, 0.2), d);
+          // Add intense white hot spots where density is very high
+          col += 0.4 * smoothstep(0.8, 1.0, d) * vec3(1.0, 0.8, 0.8);
+          // Glow
+          float alpha = smoothstep(0.05, 0.6, d);
+          gl_FragColor = vec4(col, alpha);
+        }
+      `,
+      blending: THREE.AdditiveBlending,
+      depthTest: false,
+      depthWrite: false,
+      transparent: true
+    });
+    this.displayQuad = new THREE.Mesh(geometry, material);
+    this.scene.add(this.displayQuad);
+  }
+
+  initSimulationBuffers() {
+    const w = this.width, h = this.height;
+    const options = { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBAFormat, type: THREE.HalfFloatType };
+    // We'll use RGBA: density in R, velocity X in G, velocity Y in B, unused in A
+    this.density   = new THREE.WebGLRenderTarget(w, h, options);
+    this.velocity  = new THREE.WebGLRenderTarget(w, h, options);
+    this.divergence= new THREE.WebGLRenderTarget(w, h, options);
+    this.pressure  = new THREE.WebGLRenderTarget(w, h, options);
+    this.temp      = new THREE.WebGLRenderTarget(w, h, options); // for swapping
+  }
+
+  initSimulationShaders() {
+    // We'll define a base passthrough vertex shader for fullscreen quads
+    this.baseVertex = /* glsl */ `
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = vec4(position, 1.0);
+      }
+    `;
+
+    // Advection shader (moves density and velocity along velocity field)
+    this.advectionShader = new THREE.ShaderMaterial({
+      uniforms: {
+        uVelocity: { value: null },
+        uSource:   { value: null },
+        uDt:       { value: 0.016 },
+        uDissipation: { value: this.densityDissipation }
+      },
+      vertexShader: this.baseVertex,
+      fragmentShader: /* glsl */ `
+        varying vec2 vUv;
+        uniform sampler2D uVelocity;
+        uniform sampler2D uSource;
+        uniform float uDt;
+        uniform float uDissipation;
+        void main() {
+          vec2 texelSize = 1.0 / vec2(textureSize(uSource, 0));
+          // Velocity at current pixel
+          vec2 vel = texture2D(uVelocity, vUv).gb;
+          // Backtrace position
+          vec2 coord = vUv - vel * uDt * texelSize;
+          // Bilinear filtered sample
+          vec4 result = texture2D(uSource, coord);
+          // Dissipate density (channel R) and velocity (G,B) separately? We'll only advect density here, velocity advection handled elsewhere
+          // For combined: result.r *= uDissipation; result.gb *= velocityDissipation
+          gl_FragColor = result;
+        }
+      `,
+      depthTest: false,
+      depthWrite: false
+    });
+
+    // Divergence shader
+    this.divergenceShader = new THREE.ShaderMaterial({
+      uniforms: { uVelocity: { value: null } },
+      vertexShader: this.baseVertex,
+      fragmentShader: /* glsl */ `
+        varying vec2 vUv;
+        uniform sampler2D uVelocity;
+        void main() {
+          vec2 texel = 1.0 / vec2(textureSize(uVelocity, 0));
+          float L = texture2D(uVelocity, vUv - vec2(texel.x, 0.0)).g;
+          float R = texture2D(uVelocity, vUv + vec2(texel.x, 0.0)).g;
+          float T = texture2D(uVelocity, vUv + vec2(0.0, texel.y)).b;
+          float B = texture2D(uVelocity, vUv - vec2(0.0, texel.y)).b;
+          float div = 0.5 * (R - L + T - B);
+          gl_FragColor = vec4(div, 0.0, 0.0, 1.0);
+        }
+      `,
+      depthTest: false, depthWrite: false
+    });
+
+    // Pressure Jacobi solver
+    this.pressureShader = new THREE.ShaderMaterial({
+      uniforms: {
+        uPressure: { value: null },
+        uDivergence: { value: null }
+      },
+      vertexShader: this.baseVertex,
+      fragmentShader: /* glsl */ `
+        varying vec2 vUv;
+        uniform sampler2D uPressure;
+        uniform sampler2D uDivergence;
+        void main() {
+          vec2 texel = 1.0 / vec2(textureSize(uPressure, 0));
+          float L = texture2D(uPressure, vUv - vec2(texel.x, 0.0)).r;
+          float R = texture2D(uPressure, vUv + vec2(texel.x, 0.0)).r;
+          float T = texture2D(uPressure, vUv + vec2(0.0, texel.y)).r;
+          float B = texture2D(uPressure, vUv - vec2(0.0, texel.y)).r;
+          float div = texture2D(uDivergence, vUv).r;
+          float p = (L + R + T + B - div) / 4.0;
+          gl_FragColor = vec4(p, 0.0, 0.0, 1.0);
+        }
+      `,
+      depthTest: false, depthWrite: false
+    });
+
+    // Subtract gradient shader (update velocity)
+    this.gradientSubtractShader = new THREE.ShaderMaterial({
+      uniforms: {
+        uVelocity: { value: null },
+        uPressure: { value: null }
+      },
+      vertexShader: this.baseVertex,
+      fragmentShader: /* glsl */ `
+        varying vec2 vUv;
+        uniform sampler2D uVelocity;
+        uniform sampler2D uPressure;
+        void main() {
+          vec2 texel = 1.0 / vec2(textureSize(uVelocity, 0));
+          float L = texture2D(uPressure, vUv - vec2(texel.x, 0.0)).r;
+          float R = texture2D(uPressure, vUv + vec2(texel.x, 0.0)).r;
+          float T = texture2D(uPressure, vUv + vec2(0.0, texel.y)).r;
+          float B = texture2D(uPressure, vUv - vec2(0.0, texel.y)).r;
+          vec2 vel = texture2D(uVelocity, vUv).gb;
+          vel -= 0.5 * vec2(R - L, T - B);
+          gl_FragColor = vec4(vel, 0.0, 1.0);
+        }
+      `,
+      depthTest: false, depthWrite: false
+    });
+
+    // Splat shader (adds density and velocity at a point)
+    this.splatShader = new THREE.ShaderMaterial({
+      uniforms: {
+        uTarget: { value: null },
+        uPoint: { value: new THREE.Vector2() },
+        uRadius: { value: this.splatRadius },
+        uColor: { value: new THREE.Vector3(1,0,0) },
+        uForce: { value: 0 }
+      },
+      vertexShader: this.baseVertex,
+      fragmentShader: /* glsl */ `
+        varying vec2 vUv;
+        uniform sampler2D uTarget;
+        uniform vec2 uPoint;
+        uniform float uRadius;
+        uniform vec3 uColor;
+        uniform float uForce;
+        void main() {
+          vec2 diff = vUv - uPoint;
+          float dist = length(diff);
+          float factor = smoothstep(uRadius, 0.0, dist);
+          vec4 orig = texture2D(uTarget, vUv);
+          // Add density (r) and velocity (g,b) according to direction
+          vec2 velDir = normalize(diff + 1e-5);
+          orig.r += uColor.r * factor;
+          orig.g += velDir.x * factor * uForce * 0.001;
+          orig.b += velDir.y * factor * uForce * 0.001;
+          gl_FragColor = orig;
+        }
+      `,
+      depthTest: false, depthWrite: false
+    });
+
+    // Curl shader to add turbulence (optional)
+    this.curlShader = new THREE.ShaderMaterial({
+      uniforms: {
+        uVelocity: { value: null },
+        uDt: { value: 0.016 }
+      },
+      vertexShader: this.baseVertex,
+      fragmentShader: /* glsl */ `
+        varying vec2 vUv;
+        uniform sampler2D uVelocity;
+        uniform float uDt;
+        void main() {
+          vec2 texel = 1.0 / vec2(textureSize(uVelocity, 0));
+          float L = texture2D(uVelocity, vUv - vec2(texel.x, 0.0)).g;
+          float R = texture2D(uVelocity, vUv + vec2(texel.x, 0.0)).g;
+          float T = texture2D(uVelocity, vUv + vec2(0.0, texel.y)).b;
+          float B = texture2D(uVelocity, vUv - vec2(0.0, texel.y)).b;
+          float curl = (R - L) - (T - B);
+          vec2 force = vec2(curl, -curl) * 0.1;
+          vec2 vel = texture2D(uVelocity, vUv).gb + force * uDt;
+          gl_FragColor = vec4(vel, 0.0, 1.0);
+        }
+      `,
+      depthTest: false, depthWrite: false
+    });
+
+    // Helper: Fullscreen pass function
+    this.fullscreenPass = (material, target, clear = true) => {
+      const oldTarget = this.renderer.getRenderTarget();
+      this.renderer.setRenderTarget(target);
+      if (clear) this.renderer.clear();
+      this.renderer.render(this.scene, this.camera); // renders the fullscreen quad with material
+      this.renderer.setRenderTarget(oldTarget);
+    };
+  }
+
+  // Add density and velocity at point (in normalized 0-1 coords)
+  splat(x, y, dx, dy, color = [1,0,0]) {
+    if (this.splatShader.uniforms.uPoint) {
+      this.splatShader.uniforms.uPoint.value.set(x, y);
+      this.splatShader.uniforms.uRadius.value = this.splatRadius;
+      this.splatShader.uniforms.uColor.value.set(color[0], color[1], color[2]);
+      this.splatShader.uniforms.uForce.value = this.splatForce;
+      // Splat into density
+      this.splatShader.uniforms.uTarget.value = this.density.texture;
+      this.fullscreenPass(this.splatShader, this.density, false);
+      // Splat velocity (dx,dy) into velocity field: we'll directly draw a direction?
+      // Alternative: use a simplified splat that adds direction
+      const velSplatShader = this.splatShader.clone();
+      velSplatShader.uniforms.uTarget.value = this.velocity.texture;
+      velSplatShader.uniforms.uColor.value.set(0, dx, dy);
+      this.fullscreenPass(velSplatShader, this.velocity, false);
+      velSplatShader.dispose();
     }
   }
 
-  // Event Listeners
-  window.addEventListener('mousemove', onMouseMove, { passive: true });
-  window.addEventListener('mouseleave', onMouseLeave);
-  window.addEventListener('touchmove', onTouchMove, { passive: true });
-  window.addEventListener('touchend', onTouchEnd);
-  window.addEventListener('resize', onResize);
-  
-  // Reduce motion fallback
-  const mqReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  if (mqReducedMotion.matches) {
-    // Disable particle physics: just stop animating? We'll skip particle updates.
-    // Override animate to only render static scene.
+  step(dt) {
+    dt = Math.min(dt, 0.1);
+    // 1. Advection of velocity (using itself)
+    this.advectionShader.uniforms.uVelocity.value = this.velocity.texture;
+    this.advectionShader.uniforms.uSource.value = this.velocity.texture;
+    this.advectionShader.uniforms.uDt.value = dt;
+    this.fullscreenPass(this.advectionShader, this.temp);
+    [this.velocity, this.temp] = [this.temp, this.velocity];
+
+    // 2. Advection of density
+    this.advectionShader.uniforms.uSource.value = this.density.texture;
+    this.advectionShader.uniforms.uDissipation.value = this.densityDissipation;
+    this.fullscreenPass(this.advectionShader, this.temp);
+    [this.density, this.temp] = [this.temp, this.density];
+
+    // 3. Curl noise (adds turbulence)
+    this.curlShader.uniforms.uVelocity.value = this.velocity.texture;
+    this.curlShader.uniforms.uDt.value = dt;
+    this.fullscreenPass(this.curlShader, this.temp);
+    [this.velocity, this.temp] = [this.temp, this.velocity];
+
+    // 4. Divergence
+    this.divergenceShader.uniforms.uVelocity.value = this.velocity.texture;
+    this.fullscreenPass(this.divergenceShader, this.divergence);
+
+    // 5. Pressure solve (Jacobi iterations)
+    this.pressureShader.uniforms.uDivergence.value = this.divergence.texture;
+    this.pressureShader.uniforms.uPressure.value = this.pressure.texture;
+    for (let i = 0; i < this.pressureIterations; i++) {
+      this.fullscreenPass(this.pressureShader, this.temp);
+      [this.pressure, this.temp] = [this.temp, this.pressure];
+    }
+
+    // 6. Subtract gradient
+    this.gradientSubtractShader.uniforms.uVelocity.value = this.velocity.texture;
+    this.gradientSubtractShader.uniforms.uPressure.value = this.pressure.texture;
+    this.fullscreenPass(this.gradientSubtractShader, this.temp);
+    [this.velocity, this.temp] = [this.temp, this.velocity];
+
+    // 7. Dissipate velocity
+    // Already done in advection step via dissipation? fine.
+
+    // Update display quad uniform
+    this.displayQuad.material.uniforms.uDensity.value = this.density.texture;
+    this.displayQuad.material.uniforms.uTime.value += dt;
+  }
+
+  animate() {
+    requestAnimationFrame(() => this.animate());
+    const dt = Math.min(this.clock.getDelta(), 0.1);
+
+    // If mouse position is valid, splat with velocity based on movement
+    if (this.mouse.x >= 0 && this.mouse.y >= 0) {
+      const dx = this.mouse.x - this.prevMouse.x;
+      const dy = this.mouse.y - this.prevMouse.y;
+      const color = [1.0, 0.0, 0.2]; // neon red
+      this.splat(this.mouse.x, this.mouse.y, dx * 10, dy * 10, color);
+    }
+
+    this.step(dt);
+
+    // Copy previous mouse
+    this.prevMouse.copy(this.mouse);
+
+    // Render final scene (just the quad)
+    this.renderer.setRenderTarget(null);
+    this.renderer.clear();
+    this.renderer.render(this.scene, this.camera);
+  }
+
+  resize() {
+    this.width = Math.floor(W() * this.dpr);
+    this.height = Math.floor(H() * this.dpr);
+    this.renderer.setSize(W(), H(), false);
+    // Resize all render targets
+    this.density.setSize(this.width, this.height);
+    this.velocity.setSize(this.width, this.height);
+    this.divergence.setSize(this.width, this.height);
+    this.pressure.setSize(this.width, this.height);
+    this.temp.setSize(this.width, this.height);
+  }
+
+  setMouse(x, y) {
+    this.mouse.set(x, y);
   }
 }
 
-// Start everything when DOM ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', boot);
-} else {
-  boot();
+// ──────────────────────────────────────────────
+// 8. GSAP Cinematic Reveal
+// ──────────────────────────────────────────────
+function revealPage() {
+  const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+  tl.to(mainWrapper, { opacity: 1, y: 0, duration: 1.2 })
+    .from('.hero-banner-frame', { scale: 0.96, y: 20, duration: 0.9 }, '-=0.8')
+    .from('.hero-avatar-anchor', { scale: 0.8, y: 30, duration: 0.8, ease: 'back.out(1.4)' }, '-=0.6')
+    .from('.hero-identity', { opacity: 0, y: 25, duration: 0.7 }, '-=0.5')
+    .from('.hero-bio-card', { opacity: 0, y: 30, scale: 0.98, duration: 0.8 }, '-=0.5')
+    .from('.links-header', { opacity: 0, y: 15, duration: 0.6 }, '-=0.4')
+    .from('.link-card', {
+      opacity: 0,
+      y: 40,
+      scale: 0.9,
+      stagger: { each: 0.08, from: 'start' },
+      duration: 0.7,
+      ease: 'back.out(1.2)'
+    }, '-=0.3')
+    .from('.site-footer', { opacity: 0, y: 20, duration: 0.7 }, '-=0.4');
 }
+
+// ──────────────────────────────────────────────
+// 9. Boot Sequence
+// ──────────────────────────────────────────────
+(async function boot() {
+  updatePreloaderText('INITIALIZING FLUID ENGINE');
+  const fluid = new FluidEngine(canvas);
+  updatePreloaderText('ALMOST READY');
+
+  renderLinks();
+  updateVisitorCount();
+
+  // Short artificial delay for cinematic load
+  await new Promise(r => setTimeout(r, 600));
+  updatePreloaderText('SYSTEM ONLINE');
+  await new Promise(r => setTimeout(r, 400));
+  await hidePreloader();
+
+  // Reveal UI
+  revealPage();
+
+  // Event listeners
+  window.addEventListener('mousemove', (e) => {
+    fluid.setMouse(e.clientX / W(), 1 - e.clientY / H());
+  });
+  window.addEventListener('touchmove', (e) => {
+    if (e.touches.length) {
+      fluid.setMouse(e.touches[0].clientX / W(), 1 - e.touches[0].clientY / H());
+    }
+  }, { passive: true });
+  window.addEventListener('touchend', () => {
+    fluid.setMouse(-1, -1);
+  });
+  window.addEventListener('mouseleave', () => fluid.setMouse(-1, -1));
+
+  // Gyroscope (mobile) - subtle influence
+  if (window.DeviceOrientationEvent) {
+    window.addEventListener('deviceorientation', (e) => {
+      if (fluid.mouse.x < 0) { // no mouse interaction
+        const x = THREE.MathUtils.clamp((e.gamma / 45 + 1) / 2, 0, 1);
+        const y = THREE.MathUtils.clamp((e.beta / 45 + 1) / 2, 0, 1);
+        fluid.setMouse(x, y);
+      }
+    });
+  }
+
+  // Resize handler
+  window.addEventListener('resize', () => fluid.resize());
+})();
