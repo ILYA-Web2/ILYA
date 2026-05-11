@@ -1,193 +1,260 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no">
-    <title>إيليا — Web Engineer & UI Architect</title>
-    <meta name="description" content="مطور ويب متخصص في أنظمة تفاعلية عالية الأداء — Ilya Web Engineer & UI Architect">
-    <meta name="theme-color" content="#030000">
-    <meta name="color-scheme" content="dark">
-    <meta name="robots" content="index, follow">
-    <meta name="author" content="إيليا">
-
-    <!-- Open Graph -->
-    <meta property="og:title" content="إيليا — Web Engineer & UI Architect">
-    <meta property="og:description" content="مطور ويب متخصص في أنظمة تفاعلية عالية الأداء">
-    <meta property="og:image" content="https://iili.io/fb64ziv.md.jpg">
-    <meta property="og:type" content="website">
-    <meta property="og:locale" content="ar_AR">
-    <meta name="twitter:card" content="summary_large_image">
-
-    <!-- Preconnect -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Tajawal:wght@300;400;500;700;900&family=JetBrains+Mono:wght@300;400;600&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-    <!-- Three.js CDN (global) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <!-- GSAP CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-
-    <!-- Stylesheet -->
-    <link rel="stylesheet" href="style.css">
-
-    <!-- Inline Critical CSS -->
-    <style>
-        :root { --bg: #030000; --pri: #ff0033; --white: #ffffff; }
-        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-        html,body{
-            min-height:100dvh;background:var(--bg);color:var(--white);
-            overflow-x:hidden;-webkit-font-smoothing:antialiased;
-            -moz-osx-font-smoothing:grayscale;scroll-behavior:smooth;
-            font-family:'Tajawal','Cairo',sans-serif;
-        }
-        #webgl-canvas{
-            position:fixed;inset:0;z-index:0;pointer-events:none;
-            display:block;
-        }
-        #preloader{
-            position:fixed;inset:0;z-index:9999;background:var(--bg);
-            display:flex;align-items:center;justify-content:center;
-            flex-direction:column;gap:2rem;transition:opacity .8s ease,visibility .8s;
-            cursor:wait;
-        }
-        #preloader.hidden{opacity:0;visibility:hidden;pointer-events:none}
-        .preloader-ring{
-            width:50px;height:50px;border:2px solid rgba(255,255,255,.1);
-            border-top:2px solid var(--pri);border-radius:50%;
-            animation:spin 1s linear infinite;
-        }
-        @keyframes spin{to{transform:rotate(360deg)}}
-        .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+  <title id="page-title">𝑇𝑅⁷</title>
+  <link rel="icon" id="page-icon" href="https://iili.io/qWN5VvR.md.jpg" type="image/jpeg">
+  <meta name="description" content="مطور ويب متخصص في أنظمة تفاعلية عالية الأداء">
+  <meta name="theme-color" content="#030000">
+  <meta name="color-scheme" content="dark">
+  
+  <!-- Preconnect for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Tajawal:wght@300;400;500;700;900&family=Orbitron:wght@400;500;600;700;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- Preloader -->
-    <div id="preloader" role="status" aria-label="جاري التحميل">
-        <div class="preloader-ring"></div>
-        <div style="font-family:'JetBrains Mono';font-size:0.7rem;letter-spacing:3px;color:rgba(255,255,255,.5)">INITIALIZING</div>
+<!-- ═══════════════════════════════════════
+   WEBGL CANVAS — Premium Background Engine
+═══════════════════════════════════════════════════════ -->
+<canvas id="webgl-bg"></canvas>
+
+<!-- ═══════════════════════════════════════
+   LOADER — Cinematic Preloader
+═══════════════════════════════════════════════════════ -->
+<div id="loader" role="status" aria-label="جاري التحميل">
+  <div class="loader-canvas">
+    <div class="loader-geometry">
+      <div class="geo-ring geo-ring-1"></div>
+      <div class="geo-ring geo-ring-2"></div>
+      <div class="geo-ring geo-ring-3"></div>
+      <div class="geo-core">
+        <div class="core-aura"></div>
+        <img id="ldr-logo" src="https://iili.io/qWN5VvR.md.jpg" alt="TR7" class="core-logo" loading="eager">
+        <div class="core-scan"></div>
+      </div>
+    </div>
+    <div class="loader-hud">
+      <div class="hud-brand" id="ldr-brand">TR<sup>7</sup></div>
+      <div class="hud-status" id="ldr-status">SYSTEM INITIALIZATION</div>
+      <div class="hud-track">
+        <div class="track-fill" id="ldr-fill"></div>
+        <div class="track-glow" id="ldr-glow"></div>
+      </div>
+      <div class="hud-pct" id="ldr-pct">0%</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+   ADMIN PANEL — Hidden Crown Removed
+═══════════════════════════════════════════════════════ -->
+<!-- Admin access via keyboard shortcut: Ctrl+Shift+A -->
+<div class="adm-overlay" id="adm-overlay" aria-hidden="true">
+  <div class="adm-dialog">
+    <div class="adm-header">
+      <span class="adm-icon">🔐</span>
+      <span>لوحة التحكم</span>
+    </div>
+    <div class="adm-body">
+      <p class="adm-hint">أدخل رمز الوصول</p>
+      <div class="adm-input-wrap">
+        <input type="password" id="adm-pwd" class="adm-input" placeholder="••••••" autocomplete="off" spellcheck="false">
+        <button class="adm-eye" id="adm-eye" aria-label="إظهار/إخفاء">
+          <i class="fas fa-eye" id="adm-eye-icon"></i>
+        </button>
+      </div>
+      <div class="adm-err" id="adm-err"></div>
+    </div>
+    <div class="adm-footer">
+      <button class="adm-btn adm-btn-cancel" id="adm-cancel">إلغاء</button>
+      <button class="adm-btn adm-btn-confirm" id="adm-ok">دخول</button>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Panel Sidebar -->
+<div class="adm-panel" id="adm-panel" aria-hidden="true">
+  <div class="adm-panel-header">
+    <span class="adm-ph-icon">🔐</span>
+    <span class="adm-ph-title">إعدادات الموقع</span>
+    <button class="adm-ph-close" id="adm-close" aria-label="إغلاق">✕</button>
+  </div>
+  <div class="adm-panel-body" id="adm-body">
+    <div class="adm-tabs">
+      <button class="adm-tab active" data-tab="colors">🎨 الألوان</button>
+      <button class="adm-tab" data-tab="texts">✏️ النصوص</button>
+      <button class="adm-tab" data-tab="images">🖼️ الصور</button>
+      <button class="adm-tab" data-tab="links">🔗 الروابط</button>
+      <button class="adm-tab" data-tab="sizes">📐 الأحجام</button>
     </div>
 
-    <!-- WebGL Canvas -->
-    <canvas id="webgl-canvas" aria-hidden="true"></canvas>
+    <!-- Colors Tab -->
+    <div class="adm-tab-content active" id="tab-colors">
+      <div class="adm-section-title">ألوان الموقع</div>
+      <div class="adm-grid-2">
+        <div class="adm-field">
+          <label>خلفية الصفحة</label>
+          <div class="adm-color-row">
+            <input type="color" class="adm-color" data-key="colorBg" id="c-bg">
+            <input type="text" class="adm-color-txt" data-color="colorBg" placeholder="#030000">
+          </div>
+        </div>
+        <div class="adm-field">
+          <label>اللون الرئيسي (نيون)</label>
+          <div class="adm-color-row">
+            <input type="color" class="adm-color" data-key="colorPrimary" id="c-primary">
+            <input type="text" class="adm-color-txt" data-color="colorPrimary" placeholder="#ff0033">
+          </div>
+        </div>
+        <div class="adm-field">
+          <label>اللون العميق</label>
+          <div class="adm-color-row">
+            <input type="color" class="adm-color" data-key="colorDeep" id="c-deep">
+            <input type="text" class="adm-color-txt" data-color="colorDeep" placeholder="#cc001a">
+          </div>
+        </div>
+        <div class="adm-field">
+          <label>اللون الداكن</label>
+          <div class="adm-color-row">
+            <input type="color" class="adm-color" data-key="colorDark" id="c-dark">
+            <input type="text" class="adm-color-txt" data-color="colorDark" placeholder="#8b0000">
+          </div>
+        </div>
+        <div class="adm-field">
+          <label>لون مميز</label>
+          <div class="adm-color-row">
+            <input type="color" class="adm-color" data-key="colorAccent" id="c-accent">
+            <input type="text" class="adm-color-txt" data-color="colorAccent" placeholder="#ff1744">
+          </div>
+        </div>
+        <div class="adm-field">
+          <label>لون النص</label>
+          <div class="adm-color-row">
+            <input type="color" class="adm-color" data-key="colorText" id="c-text">
+            <input type="text" class="adm-color-txt" data-color="colorText" placeholder="#ffffff">
+          </div>
+        </div>
+        <div class="adm-field">
+          <label>خلفية البطاقة</label>
+          <div class="adm-color-row">
+            <input type="color" class="adm-color" data-key="colorCardBg" id="c-card">
+            <input type="text" class="adm-color-txt" data-color="colorCardBg" placeholder="rgba(5,1,2,0.60)">
+          </div>
+        </div>
+        <div class="adm-field">
+          <label>لون الحواف</label>
+          <div class="adm-color-row">
+            <input type="color" class="adm-color" data-key="colorBorder" id="c-border">
+            <input type="text" class="adm-color-txt" data-color="colorBorder" placeholder="rgba(255,0,51,0.18)">
+          </div>
+        </div>
+      </div>
+      <div class="adm-save-row">
+        <button class="adm-btn adm-btn-reset" id="reset-colors">↺ إعادة ضبط</button>
+        <button class="adm-btn adm-btn-confirm adm-save-btn" data-save="colors">💾 حفظ</button>
+      </div>
+    </div>
 
-    <!-- Main Content -->
-    <main id="main-content" class="main-wrapper">
+    <!-- Texts Tab -->
+    <div class="adm-tab-content" id="tab-texts">
+      <div class="adm-section-title">نصوص الموقع</div>
+      <div class="adm-fields-col">
+        <div class="adm-field"><label>عنوان الصفحة</label><input type="text" class="adm-input" data-key="pageTitle" placeholder="𝑇𝑅⁷"></div>
+        <div class="adm-field"><label>الاسم الرئيسي</label><input type="text" class="adm-input" data-key="profileName" placeholder="جلال"></div>
+        <div class="adm-field"><label>اللقب المهني</label><input type="text" class="adm-input" data-key="profileSubtitle" placeholder="Web Engineer & UI Architect"></div>
+        <div class="adm-field"><label>قوس فتح</label><input type="text" class="adm-input" data-key="bracketOpen" placeholder="[" maxlength="3"></div>
+        <div class="adm-field"><label>قوس إغلاق</label><input type="text" class="adm-input" data-key="bracketClose" placeholder="]" maxlength="3"></div>
+        <div class="adm-field"><label>الوصف / البايو</label><textarea class="adm-textarea" data-key="profileDesc" rows="4"></textarea></div>
+        <div class="adm-field"><label>عنوان قسم الروابط</label><input type="text" class="adm-input" data-key="sectionTitle" placeholder="تواصل"></div>
+        <div class="adm-field"><label>نص شريط الغلاف</label><input type="text" class="adm-input" data-key="coverHudText" placeholder="COVER · LIVE"></div>
+        <div class="adm-field"><label>نص الفوتر</label><input type="text" class="adm-input" data-key="footerCopy" placeholder="© 2026 جلال"></div>
+        <div class="adm-field"><label>رابط الموقع (نص)</label><input type="text" class="adm-input" data-key="footerUrlLabel" placeholder="black3web.github.io"></div>
+        <div class="adm-field"><label>رابط الموقع (URL)</label><input type="url" class="adm-input" data-key="footerUrl" placeholder="https://..."></div>
+        <div class="adm-field"><label>تسمية الزوار</label><input type="text" class="adm-input" data-key="footerVisLabel" placeholder="VISITS"></div>
+        <div class="adm-field"><label>نص اللودر</label><input type="text" class="adm-input" data-key="loaderBrand" placeholder="TR7"></div>
+      </div>
+      <div class="adm-save-row">
+        <button class="adm-btn adm-btn-reset" id="reset-texts">↺ إعادة ضبط</button>
+        <button class="adm-btn adm-btn-confirm adm-save-btn" data-save="texts">💾 حفظ</button>
+      </div>
+    </div>
 
-        <!-- Hero Section -->
-        <section class="hero-section">
-            <div class="hero-inner">
-                <!-- Banner -->
-                <div class="banner-frame" id="banner-frame">
-                    <img src="https://iili.io/fb6SvS9.md.jpg" alt="غلاف" class="banner-img" loading="eager">
-                    <div class="banner-vignette"></div>
-                </div>
+    <!-- Images Tab -->
+    <div class="adm-tab-content" id="tab-images">
+      <div class="adm-section-title">صور الموقع</div>
+      <p class="adm-hint-sm">روابط مباشرة فقط (iili.io, imgur, إلخ)</p>
+      <div class="adm-fields-col">
+        <div class="adm-field">
+          <label>صورة الغلاف</label>
+          <input type="url" class="adm-input" data-key="bannerUrl" placeholder="https://iili.io/...">
+          <div class="adm-img-preview"><img id="prev-banner" src="" alt="" onerror="this.style.display='none'" onload="this.style.display='block'"></div>
+        </div>
+        <div class="adm-field">
+          <label>صورة الملف الشخصي</label>
+          <input type="url" class="adm-input" data-key="profileUrl" placeholder="https://iili.io/...">
+          <div class="adm-img-preview"><img id="prev-profile" src="" alt="" onerror="this.style.display='none'" onload="this.style.display='block'"></div>
+        </div>
+        <div class="adm-field">
+          <label>شعار اللودر</label>
+          <input type="url" class="adm-input" data-key="logoUrl" placeholder="https://iili.io/...">
+          <div class="adm-img-preview"><img id="prev-logo" src="" alt="" onerror="this.style.display='none'" onload="this.style.display='block'"></div>
+        </div>
+      </div>
+      <div class="adm-save-row">
+        <button class="adm-btn adm-btn-confirm adm-save-btn" data-save="images">💾 حفظ</button>
+      </div>
+    </div>
 
-                <!-- Avatar -->
-                <div class="avatar-anchor">
-                    <div class="avatar-frame" id="avatar-frame">
-                        <div class="avatar-orbit"></div>
-                        <img src="https://iili.io/fb64ziv.md.jpg" alt="إيليا" class="avatar-img" loading="eager">
-                    </div>
-                </div>
+    <!-- Links Tab -->
+    <div class="adm-tab-content" id="tab-links">
+      <div class="adm-section-title">روابط التواصل</div>
+      <div id="adm-links-list"></div>
+      <button class="adm-btn adm-btn-add" id="adm-add-link">+ إضافة رابط</button>
+      <div class="adm-save-row">
+        <button class="adm-btn adm-btn-confirm adm-save-btn" data-save="links">💾 حفظ</button>
+      </div>
+    </div>
 
-                <!-- Identity -->
-                <div class="identity">
-                    <h1 class="name" id="hero-name">
-                        <span class="name-text rgb-animate">إيليا</span>
-                        <span class="name-sub">ILYA</span>
-                    </h1>
-                    <p class="title">
-                        <span class="title-bracket">[</span>
-                        <span>Web Engineer &amp; UI Architect</span>
-                        <span class="title-bracket">]</span>
-                    </p>
-                </div>
+    <!-- Sizes Tab -->
+    <div class="adm-tab-content" id="tab-sizes">
+      <div class="adm-section-title">أحجام العناصر</div>
+      <div class="adm-grid-2">
+        <div class="adm-field"><label>حجم الصورة الشخصية (px)</label><input type="number" class="adm-input" data-key="profileSize" min="60" max="200" step="2"></div>
+        <div class="adm-field"><label>ارتفاع الغلاف (px)</label><input type="number" class="adm-input" data-key="bannerHeight" min="100" max="500" step="5"></div>
+        <div class="adm-field"><label>انحناء البطاقة (px)</label><input type="number" class="adm-input" data-key="cardRadius" min="0" max="60" step="2"></div>
+        <div class="adm-field"><label>حجم الاسم (px)</label><input type="number" class="adm-input" data-key="nameFontSize" min="20" max="100" step="1"></div>
+        <div class="adm-field"><label>حجم اللقب (px)</label><input type="number" class="adm-input" data-key="titleFontSize" min="8" max="30" step="1"></div>
+        <div class="adm-field"><label>حجم الوصف (px)</label><input type="number" class="adm-input" data-key="descFontSize" min="10" max="24" step="1"></div>
+        <div class="adm-field"><label>حجم الأيقونات (px)</label><input type="number" class="adm-input" data-key="iconSize" min="32" max="100" step="2"></div>
+        <div class="adm-field"><label>حجم الفوتر (px)</label><input type="number" class="adm-input" data-key="footerFontSize" min="8" max="20" step="1"></div>
+      </div>
+      <div class="adm-save-row">
+        <button class="adm-btn adm-btn-reset" id="reset-sizes">↺ إعادة ضبط</button>
+        <button class="adm-btn adm-btn-confirm adm-save-btn" data-save="sizes">💾 حفظ</button>
+      </div>
+    </div>
+  </div>
+  <div class="adm-panel-footer">
+    <button class="adm-btn adm-btn-reset adm-btn-full-reset" id="adm-full-reset">↺ إعادة ضبط الكل</button>
+    <button class="adm-btn adm-btn-confirm adm-btn-save-all" id="adm-save-all">💾 حفظ الكل</button>
+  </div>
+</div>
+<div class="adm-panel-backdrop" id="adm-backdrop"></div>
 
-                <!-- Bio Card -->
-                <div class="bio-card glass">
-                    <p class="bio-text">
-                        مطور ويب محترف ومتخصص في دمج حلول الذكاء الاصطناعي مع تطبيقات الويب الحديثة. أمتلك خبرة عميقة في بناء أنظمة تفاعلية عالية الأداء تركز على تجربة المستخدم، وتوظيف تقنيات AI/ML لتقديم تجارب استثنائية.
-                    </p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Links Section -->
-        <section class="links-section">
-            <h2 class="section-title">
-                <span class="title-line"></span>
-                <span>تواصل</span>
-                <span class="title-line"></span>
-            </h2>
-            <div class="links-grid" id="links-grid">
-                <!-- JS will populate from config -->
-            </div>
-        </section>
-
-        <!-- Footer -->
-        <footer class="site-footer">
-            <div class="footer-divider">
-                <span class="divider-line"></span>
-                <span class="divider-gem">◆</span>
-                <span class="divider-line"></span>
-            </div>
-            <div class="footer-content">
-                <span class="footer-copy">© 2026 إيليا — جميع الحقوق محفوظة</span>
-                <div class="visitor-badge" id="visitor-badge">
-                    <i class="fas fa-eye"></i>
-                    <span id="visit-count">0</span>
-                    <span>VISITS</span>
-                </div>
-                <a href="https://black3web.github.io/Blackweb/" target="_blank" rel="noopener" class="footer-url">
-                    <span class="url-arrow">⟶</span>
-                    <span>black3web.github.io/Blackweb</span>
-                </a>
-            </div>
-        </footer>
-
-    </main>
-
-    <!-- Data Configuration (extracted from original) -->
-    <script id="site-config" type="application/json">
-        {
-            "profile": {
-                "name": "إيليا",
-                "nameEn": "ILYA",
-                "title": "Web Engineer & UI Architect",
-                "description": "مطور ويب محترف ومتخصص في دمج حلول الذكاء الاصطناعي مع تطبيقات الويب الحديثة. أمتلك خبرة عميقة في بناء أنظمة تفاعلية عالية الأداء تركز على تجربة المستخدم، وتوظيف تقنيات AI/ML لتقديم تجارب استثنائية."
-            },
-            "branding": {
-                "bannerUrl": "https://iili.io/fb6SvS9.md.jpg",
-                "avatarUrl": "https://iili.io/fb64ziv.md.jpg",
-                "siteUrl": "https://black3web.github.io/Blackweb/",
-                "siteLabel": "black3web.github.io/Blackweb"
-            },
-            "colors": {
-                "bg": "#030000",
-                "primary": "#ff0033",
-                "accent": "#ff1744",
-                "text": "#ffffff"
-            },
-            "links": [
-                {"id":"lnk1","name":"GitHub","url":"https://github.com/","icon":"fa-brands fa-github"},
-                {"id":"lnk2","name":"Email","url":"mailto:contact@black3web.dev","icon":"fa-solid fa-envelope"},
-                {"id":"lnk3","name":"LinkedIn","url":"https://linkedin.com/","icon":"fa-brands fa-linkedin-in"},
-                {"id":"lnk4","name":"WhatsApp","url":"https://wa.me/","icon":"fa-brands fa-whatsapp"},
-                {"id":"lnk5","name":"Telegram","url":"https://t.me/","icon":"fa-brands fa-telegram-plane"},
-                {"id":"lnk6","name":"X (Twitter)","url":"https://x.com/","icon":"fa-brands fa-x-twitter"}
-            ]
-        }
-    </script>
-
-    <!-- Main Script -->
-    <script src="main.js"></script>
-</body>
-</html>
+<!-- ═══════════════════════════════════════
+   IMAGE MODAL — Premium Lightbox
+═══════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="img-modal" role="dialog" aria-modal="true" aria-hidden="true">
+  <button class="modal-close" id="modal-close" aria-label="إغ
