@@ -2,8 +2,8 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
-  <title>ㅤ𝑇𝑅⁷ㅤ</title>
+  <meta name="viewport" content="width=1024">
+  <title>ㅤILYAㅤ</title>
   <link rel="icon" href="https://iili.io/qWN5VvR.md.jpg" type="image/jpeg">
   <meta name="description" content="إيليا — مطوّر أنظمة تفاعلية فائقة الأداء">
   <meta name="theme-color" content="#030000">
@@ -14,14 +14,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-  <!-- CDN — No importmap, No ES modules -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 
   <link rel="stylesheet" href="style.css">
 
   <script>
-    /* Inline defaults — config.js overrides what it knows */
+    /* الإعدادات الأساسية للموقع - تم تحديث الروابط والهوية */
     window.TR7 = {
       profileName    : 'إيليا',
       profileSubtitle: 'Web Engineer & UI Architect',
@@ -38,29 +37,22 @@
       profileUrl     : 'https://iili.io/fb64ziv.md.jpg',
       logoUrl        : 'https://iili.io/qWN5VvR.md.jpg',
       links: [
-        { name:'Telegram',  url:'https://t.me/ILYA_BOT',        icon:'fab fa-telegram',  handle:'@ILYA_BOT', color:'#2aabee' },
-        { name:'WhatsApp',  url:'https://wa.me/',               icon:'fab fa-whatsapp',  handle:'WhatsApp',  color:'#25d366' },
-        { name:'Instagram', url:'https://instagram.com/',       icon:'fab fa-instagram', handle:'@ilya',     color:'#e1306c' },
-        { name:'GitHub',    url:'https://github.com/black3web', icon:'fab fa-github',    handle:'black3web', color:'#ffffff' },
-        { name:'Snapchat',  url:'https://snapchat.com/',        icon:'fab fa-snapchat',  handle:'Snapchat',  color:'#fffc00' },
-        { name:'TikTok',    url:'https://tiktok.com/',          icon:'fab fa-tiktok',    handle:'TikTok',    color:'#ffffff' }
+        { name:'YouTube',   url:'https://youtube.com/@scv_t',     icon:'fab fa-youtube',   handle:'scv_t',     color:'#ff0000' },
+        { name:'Instagram', url:'https://instagram.com/szc2v',    icon:'fab fa-instagram', handle:'szc2v',     color:'#e1306c' },
+        { name:'Telegram',  url:'https://t.me/ILYA3bot',          icon:'fab fa-telegram',  handle:'@ILYA3bot', color:'#2aabee' },
+        { name:'Channel',   url:'https://t.me/swc_t',             icon:'fas fa-bullhorn',  handle:'قناة تليجرام', color:'#ffffff' }
       ]
     };
   </script>
-  <script src="config.js" onerror="void 0"></script>
 </head>
 <body>
 
-<!-- WebGL canvas -->
 <canvas id="canvas-bg" aria-hidden="true"></canvas>
 
-<!-- Atmosphere -->
 <div class="atmo-vignette"  aria-hidden="true"></div>
 <div class="atmo-scanlines" aria-hidden="true"></div>
 
-<!-- ══════════════ LOADER ══════════════ -->
 <div id="loader" role="status" aria-label="جاري التحميل">
-
   <div class="ldr-ring ldr-ring-a" aria-hidden="true"></div>
   <div class="ldr-ring ldr-ring-b" aria-hidden="true"></div>
   <div class="ldr-ring ldr-ring-c" aria-hidden="true"></div>
@@ -97,7 +89,7 @@
   </div>
 
   <div class="ldr-hud">
-    <div class="ldr-brand">TR<sup>7</sup></div>
+    <div class="ldr-brand">ILYA</div>
     <div class="ldr-status" id="ldr-status">INITIALIZING SYSTEM</div>
     <div class="ldr-bar-row">
       <div class="ldr-track">
@@ -107,14 +99,8 @@
       <span class="ldr-pct" id="ldr-pct">0%</span>
     </div>
   </div>
-
-  <span class="lhud lhud-tl" aria-hidden="true"></span>
-  <span class="lhud lhud-tr" aria-hidden="true"></span>
-  <span class="lhud lhud-bl" aria-hidden="true"></span>
-  <span class="lhud lhud-br" aria-hidden="true"></span>
 </div>
 
-<!-- ══════════════ IMAGE MODAL ══════════════ -->
 <div class="modal-overlay" id="img-modal" role="dialog" aria-modal="true" aria-hidden="true">
   <button class="modal-close" id="modal-close" aria-label="إغلاق">
     <i class="fas fa-times" aria-hidden="true"></i>
@@ -128,11 +114,8 @@
   </div>
 </div>
 
-<!-- ══════════════ MAIN CARD ══════════════ -->
 <main class="page-wrap">
   <article class="glass-card" id="main-card">
-
-    <!-- Card decoration -->
     <div class="card-glow-layer" aria-hidden="true"></div>
     <svg class="card-border-svg" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
       <defs>
@@ -152,16 +135,9 @@
     </svg>
     <div class="card-scanlines" aria-hidden="true"></div>
     <div class="card-grain"     aria-hidden="true"></div>
-    <span class="cc cc-tl" aria-hidden="true"></span>
-    <span class="cc cc-tr" aria-hidden="true"></span>
-    <span class="cc cc-bl" aria-hidden="true"></span>
-    <span class="cc cc-br" aria-hidden="true"></span>
 
-    <!-- ── Banner ── -->
-    <div class="banner-wrap" id="banner-wrap"
-         role="button" tabindex="0" aria-label="تكبير صورة الغلاف">
-      <img id="banner-img" src="https://iili.io/fb6SvS9.md.jpg"
-           alt="" class="banner-img" loading="eager" decoding="async">
+    <div class="banner-wrap" id="banner-wrap" role="button" tabindex="0" aria-label="تكبير صورة الغلاف">
+      <img id="banner-img" src="https://iili.io/fb6SvS9.md.jpg" alt="" class="banner-img" loading="eager" decoding="async">
       <div class="banner-vignette" aria-hidden="true"></div>
       <div class="banner-fade"     aria-hidden="true"></div>
       <div class="banner-hud"      aria-hidden="true">
@@ -170,10 +146,8 @@
       </div>
     </div>
 
-    <!-- ── Profile photo ── -->
     <section class="profile-section">
-      <div class="profile-wrap" id="profile-wrap"
-           role="button" tabindex="0" aria-label="تكبير الصورة الشخصية">
+      <div class="profile-wrap" id="profile-wrap" role="button" tabindex="0" aria-label="تكبير الصورة الشخصية">
         <svg class="pr1" viewBox="0 0 180 180" overflow="visible" aria-hidden="true">
           <defs>
             <linearGradient id="prg1" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -185,29 +159,15 @@
           <circle cx="90" cy="90" r="82" fill="none" stroke="rgba(200,0,30,.07)" stroke-width=".5"/>
           <circle cx="90" cy="90" r="82" fill="none" stroke="url(#prg1)" stroke-width="3" stroke-linecap="round" stroke-dasharray="78 437" class="pr-cw"/>
         </svg>
-        <svg class="pr2" viewBox="0 0 180 180" overflow="visible" aria-hidden="true">
-          <defs>
-            <linearGradient id="prg2" x1="100%" y1="100%" x2="0%" y2="0%">
-              <stop offset="0%"   stop-color="#880011" stop-opacity="0"/>
-              <stop offset="50%"  stop-color="#cc001a" stop-opacity="1"/>
-              <stop offset="100%" stop-color="#ff3355" stop-opacity=".75"/>
-            </linearGradient>
-          </defs>
-          <circle cx="90" cy="90" r="82" fill="none" stroke="url(#prg2)" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="52 463" class="pr-ccw"/>
-        </svg>
         <div class="pr-aura"  aria-hidden="true"></div>
-        <img id="profile-img" src="https://iili.io/fb64ziv.md.jpg"
-             alt="إيليا" class="profile-img" loading="eager" decoding="async">
-        <div class="pr-shine" aria-hidden="true"></div>
+        <img id="profile-img" src="https://iili.io/fb64ziv.md.jpg" alt="إيليا" class="profile-img" loading="eager" decoding="async">
       </div>
     </section>
 
-    <!-- ── Info ── -->
     <section class="profile-info">
       <h1 class="profile-name">
         <span class="pn-glow" id="profile-name-txt">إيليا</span>
         <span class="pn-sub">ILYA</span>
-        <span class="pn-line" aria-hidden="true"></span>
       </h1>
 
       <p class="profile-title">
@@ -223,7 +183,6 @@
       </div>
     </section>
 
-    <!-- ── Links ── -->
     <section class="links-section">
       <h2 class="section-title">
         <span class="stl"     aria-hidden="true"></span>
@@ -231,11 +190,9 @@
         <span class="stl"     aria-hidden="true"></span>
       </h2>
       <div class="links-grid" id="links-grid">
-        <!-- Rendered by main.js -->
-      </div>
+        </div>
     </section>
 
-    <!-- ── Footer ── -->
     <footer class="site-footer">
       <div class="fd-rule" aria-hidden="true">
         <div class="fd-ln"></div>
@@ -244,21 +201,10 @@
       </div>
       <div class="footer-inner">
         <div class="f-left">
-          <span class="f-copy" id="footer-copy-txt">© 2026 إيليا — جميع الحقوق محفوظة</span>
-          <div class="visitor-badge">
-            <i class="fas fa-eye" aria-hidden="true"></i>
-            <span id="visit-count">0</span>
-            <span class="vbl" id="footer-vis-label">VISITS</span>
-          </div>
+          <span class="f-copy" id="footer-copy-txt">© 2026 ILYA — جميع الحقوق محفوظة</span>
         </div>
-        <a id="footer-url-link" href="https://black3web.github.io/Blackweb/"
-           target="_blank" rel="noopener noreferrer" class="site-url">
-          <span class="su-a" aria-hidden="true">⟶</span>
-          <span id="footer-url-label-txt">black3web.github.io</span>
-        </a>
       </div>
     </footer>
-
   </article>
 </main>
 
