@@ -1,320 +1,142 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ILYA</title>
-  <link rel="icon" href="https://iili.io/qWN5VvR.md.jpg">
-  <meta name="description" content="إيليا — مطوّر أنظمة تفاعلية وذكاء اصطناعي">
-  <meta name="theme-color" content="#040001">
-
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-  <!-- Three.js r128 + GSAP 3.12 — CDN, no importmap -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-
-  <link rel="stylesheet" href="style.css">
-
-  <!-- Site data — override in config.js if present -->
-  <script>
-    window.ILYA = {
-      profileName    : 'إيليا',
-      profileSubtitle: 'Web Developer & AI Engineer',
-      profileDesc    : 'مطوّر ويب محترف متخصص في دمج الذكاء الاصطناعي مع تطبيقات الويب الحديثة. أبني أنظمة تفاعلية عالية الأداء وأؤمن بأن الجماليات والوظائف يجب أن تعمل معاً بتناغم تام.',
-      sectionTitle   : 'تواصل معي',
-      footerCopy     : '© 2026 إيليا • ILYA',
-      siteUrl        : 'https://black3web.github.io/Blackweb/',
-      siteLabel      : 'black3web.github.io',
-      bannerUrl      : 'https://iili.io/fb6SvS9.md.jpg',
-      profileUrl     : 'https://iili.io/fb64ziv.md.jpg',
-      links: [
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>ILYA | مبرمج و مطور ذكاء اصطناعي</title>
+    <!-- الخطوط -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css">
+    <!-- Three.js -->
+    <script type="importmap">
         {
-          name  : 'YouTube',
-          url   : 'https://youtube.com/@scv_t',
-          icon  : 'fab fa-youtube',
-          handle: '@scv_t',
-          color : '#ff2020',
-          glow  : 'rgba(255,32,32,0.28)'
-        },
-        {
-          name  : 'Instagram',
-          url   : 'https://instagram.com/szc2v',
-          icon  : 'fab fa-instagram',
-          handle: '@szc2v',
-          color : '#e1306c',
-          glow  : 'rgba(225,48,108,0.28)'
-        },
-        {
-          name  : 'Telegram',
-          url   : 'https://t.me/ILYA3bot',
-          icon  : 'fab fa-telegram',
-          handle: '@ILYA3bot',
-          color : '#2aabee',
-          glow  : 'rgba(42,171,238,0.28)'
-        },
-        {
-          name  : 'القناة',
-          url   : 'https://t.me/swc_t',
-          icon  : 'fas fa-paper-plane',
-          handle: '@swc_t',
-          color : '#1d9ed4',
-          glow  : 'rgba(29,158,212,0.28)'
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+            }
         }
-      ]
-    };
-  </script>
-  <script src="config.js" onerror="void 0"></script>
+    </script>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- ══ WebGL aurora canvas ══ -->
-<canvas id="webgl-canvas" aria-hidden="true"></canvas>
-
-<!-- ══ Atmospheric overlays ══ -->
-<div class="ov-vignette" aria-hidden="true"></div>
-<div class="ov-noise"    aria-hidden="true"></div>
-
-<!-- ══════════════════════ LOADER ══════════════════════ -->
-<div id="loader" role="status" aria-label="جاري التحميل">
-
-  <!-- Circular SVG progress ring -->
-  <div class="ldr-ring-wrap" aria-hidden="true">
-    <svg class="ldr-svg" viewBox="0 0 100 100">
-      <defs>
-        <linearGradient id="lg-ring" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%"   stop-color="#ff0033"/>
-          <stop offset="50%"  stop-color="#ff1744"/>
-          <stop offset="100%" stop-color="#ffffff" stop-opacity="0.85"/>
-        </linearGradient>
-        <filter id="glow-ring">
-          <feGaussianBlur stdDeviation="1.5" result="blur"/>
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-      </defs>
-      <!-- Track -->
-      <circle cx="50" cy="50" r="44"
-              fill="none" stroke="rgba(255,0,51,0.08)" stroke-width="1.5"/>
-      <!-- Outer slow spin -->
-      <circle cx="50" cy="50" r="44"
-              fill="none" stroke="rgba(200,0,30,0.12)" stroke-width="0.5"
-              stroke-dasharray="8 20" class="ldr-spin-slow"/>
-      <!-- Progress arc -->
-      <circle cx="50" cy="50" r="44"
-              fill="none" stroke="url(#lg-ring)" stroke-width="2.5"
-              stroke-linecap="round" stroke-dasharray="276.46" stroke-dashoffset="276.46"
-              id="ldr-arc" filter="url(#glow-ring)"
-              transform="rotate(-90 50 50)"/>
-      <!-- Inner ring -->
-      <circle cx="50" cy="50" r="34"
-              fill="none" stroke="rgba(255,0,51,0.07)" stroke-width="1"
-              stroke-dasharray="5 15" class="ldr-spin-rev"/>
-    </svg>
-  </div>
-
-  <!-- Logo in center -->
-  <div class="ldr-logo-wrap" aria-hidden="true">
-    <div class="ldr-logo-aura"></div>
-    <img id="ldr-logo" class="ldr-logo"
-         src="https://iili.io/qWN5VvR.md.jpg" alt="" loading="eager" decoding="async">
-    <div class="ldr-logo-scan"></div>
-  </div>
-
-  <!-- Brand + status -->
-  <div class="ldr-info">
-    <p class="ldr-brand">ILYA</p>
-    <p class="ldr-status" id="ldr-status">BOOT SEQUENCE</p>
-  </div>
-
-  <!-- Linear progress bar -->
-  <div class="ldr-bar-wrap">
-    <div class="ldr-bar-track">
-      <div class="ldr-bar-fill" id="ldr-bar"></div>
-      <div class="ldr-bar-glow" id="ldr-bar-glow"></div>
-    </div>
-    <span class="ldr-pct" id="ldr-pct">0%</span>
-  </div>
-
-  <!-- HUD corners -->
-  <span class="hc hc-tl" aria-hidden="true"></span>
-  <span class="hc hc-tr" aria-hidden="true"></span>
-  <span class="hc hc-bl" aria-hidden="true"></span>
-  <span class="hc hc-br" aria-hidden="true"></span>
-</div>
-
-<!-- ══════════════════════ IMAGE MODAL ══════════════════════ -->
-<div id="modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
-  <button class="modal-close" id="modal-close" aria-label="إغلاق">
-    <i class="fas fa-times" aria-hidden="true"></i>
-  </button>
-  <figure class="modal-frame">
-    <img id="modal-img" src="" alt="" class="modal-img">
-    <span class="mc mc-tl" aria-hidden="true"></span>
-    <span class="mc mc-tr" aria-hidden="true"></span>
-    <span class="mc mc-bl" aria-hidden="true"></span>
-    <span class="mc mc-br" aria-hidden="true"></span>
-  </figure>
-</div>
-
-<!-- ══════════════════════ PAGE ══════════════════════ -->
-<main class="page" id="page">
-  <article class="card" id="card">
-
-    <!-- Card decorations -->
-    <div class="card-ambient" aria-hidden="true"></div>
-    <svg class="card-border-svg" viewBox="0 0 100 100"
-         preserveAspectRatio="none" aria-hidden="true">
-      <defs>
-        <linearGradient id="cb-h" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%"   stop-color="#ff0033" stop-opacity="0"/>
-          <stop offset="50%"  stop-color="#ff0033" stop-opacity="0.9"/>
-          <stop offset="100%" stop-color="#ff0033" stop-opacity="0"/>
-        </linearGradient>
-        <linearGradient id="cb-v" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%"   stop-color="#880011" stop-opacity="0"/>
-          <stop offset="50%"  stop-color="#880011" stop-opacity="0.5"/>
-          <stop offset="100%" stop-color="#880011" stop-opacity="0"/>
-        </linearGradient>
-      </defs>
-      <rect x=".6" y=".6" width="98.8" height="98.8" rx="5.5"
-            fill="none" stroke="url(#cb-h)" stroke-width=".6"
-            stroke-dasharray="20 80" class="cbs-cw"/>
-      <rect x=".6" y=".6" width="98.8" height="98.8" rx="5.5"
-            fill="none" stroke="url(#cb-v)" stroke-width=".4"
-            stroke-dasharray="14 86" class="cbs-ccw"/>
-    </svg>
-    <div class="card-scanlines" aria-hidden="true"></div>
-    <span class="cc cc-tl" aria-hidden="true"></span>
-    <span class="cc cc-tr" aria-hidden="true"></span>
-    <span class="cc cc-bl" aria-hidden="true"></span>
-    <span class="cc cc-br" aria-hidden="true"></span>
-
-    <!-- ── Banner ── -->
-    <div class="banner" id="banner"
-         role="button" tabindex="0" aria-label="عرض صورة الغلاف">
-      <img id="banner-img"
-           src="https://iili.io/fb6SvS9.md.jpg"
-           alt="" class="banner-img" loading="eager" decoding="async">
-      <div class="banner-overlay" aria-hidden="true"></div>
-      <div class="banner-bottom"  aria-hidden="true"></div>
-      <div class="banner-badge"   aria-hidden="true">
-        <span class="badge-dot"></span>
-        <span class="badge-text">LIVE</span>
-      </div>
-    </div>
-
-    <!-- ── Avatar ── -->
-    <div class="avatar-section">
-      <div class="avatar-wrap" id="avatar-wrap"
-           role="button" tabindex="0" aria-label="عرض الصورة الشخصية">
-        <!-- Spinning rings -->
-        <svg class="av-ring" viewBox="0 0 120 120" aria-hidden="true">
-          <defs>
-            <linearGradient id="av-g1" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%"   stop-color="#ff0033" stop-opacity="0"/>
-              <stop offset="55%"  stop-color="#ff0033" stop-opacity="1"/>
-              <stop offset="100%" stop-color="#ffaaaa" stop-opacity="0.85"/>
-            </linearGradient>
-            <linearGradient id="av-g2" x1="100%" y1="100%" x2="0%" y2="0%">
-              <stop offset="0%"   stop-color="#660010" stop-opacity="0"/>
-              <stop offset="50%"  stop-color="#cc001a" stop-opacity="0.9"/>
-              <stop offset="100%" stop-color="#ff3355" stop-opacity="0.6"/>
-            </linearGradient>
-            <filter id="av-glow">
-              <feGaussianBlur stdDeviation="1.2" result="b"/>
-              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-            </filter>
-          </defs>
-          <!-- Background track -->
-          <circle cx="60" cy="60" r="55" fill="none"
-                  stroke="rgba(200,0,30,0.06)" stroke-width="0.5"/>
-          <!-- Primary ring -->
-          <circle cx="60" cy="60" r="55" fill="none"
-                  stroke="url(#av-g1)" stroke-width="2.5"
-                  stroke-linecap="round" stroke-dasharray="75 271"
-                  class="av-cw" filter="url(#av-glow)"/>
-          <!-- Secondary ring -->
-          <circle cx="60" cy="60" r="55" fill="none"
-                  stroke="url(#av-g2)" stroke-width="1.5"
-                  stroke-linecap="round" stroke-dasharray="48 297"
-                  class="av-ccw"/>
-        </svg>
-        <!-- Glow aura -->
-        <div class="av-aura" aria-hidden="true"></div>
-        <!-- Photo -->
-        <img id="profile-img"
-             src="https://iili.io/fb64ziv.md.jpg"
-             alt="إيليا" class="avatar-img" loading="eager" decoding="async">
-        <!-- Shine overlay -->
-        <div class="av-shine" aria-hidden="true"></div>
-      </div>
-    </div>
-
-    <!-- ── Profile info ── -->
-    <section class="info">
-
-      <h1 class="name-block">
-        <span class="name-ar" id="profile-name">إيليا</span>
-        <span class="name-en">ILYA</span>
-        <span class="name-rule" aria-hidden="true"></span>
-      </h1>
-
-      <p class="subtitle-line">
-        <span class="sb-bkt" id="bracket-l">《</span>
-        <span class="sb-txt"  id="profile-subtitle">Web Developer &amp; AI Engineer</span>
-        <span class="sb-bkt" id="bracket-r">》</span>
-      </p>
-
-      <div class="bio-wrap">
-        <span class="bio-rule bio-rule--top" aria-hidden="true"></span>
-        <p class="bio-text" id="profile-desc">مطوّر ويب محترف متخصص في دمج الذكاء الاصطناعي مع تطبيقات الويب الحديثة. أبني أنظمة تفاعلية عالية الأداء وأؤمن بأن الجماليات والوظائف يجب أن تعمل معاً بتناغم تام.</p>
-        <span class="bio-rule bio-rule--bot" aria-hidden="true"></span>
-      </div>
-
-    </section>
-
-    <!-- ── Social links ── -->
-    <section class="links-section">
-      <h2 class="links-heading">
-        <span class="lh-rule" aria-hidden="true"></span>
-        <span id="section-title">تواصل معي</span>
-        <span class="lh-rule" aria-hidden="true"></span>
-      </h2>
-      <div class="links-grid" id="links-grid">
-        <!-- Rendered by main.js -->
-      </div>
-    </section>
-
-    <!-- ── Footer ── -->
-    <footer class="footer">
-      <div class="ft-rule" aria-hidden="true">
-        <span class="ft-line"></span>
-        <span class="ft-gem">◆</span>
-        <span class="ft-line"></span>
-      </div>
-      <div class="ft-inner">
-        <span class="ft-copy" id="footer-copy">© 2026 إيليا • ILYA</span>
-        <div class="ft-visits">
-          <i class="fas fa-eye" aria-hidden="true"></i>
-          <span id="visit-count">0</span>
-          <span class="ft-vis-lbl">زيارة</span>
+    <!-- شاشة التحميل (Loading Screen) -->
+    <div id="loading-screen">
+        <div class="loading-content">
+            <img src="https://iili.io/qWN5VvR.md.jpg" alt="Logo" class="loading-logo">
+            <div class="loading-bar-container">
+                <div class="loading-bar" id="loading-bar"></div>
+            </div>
         </div>
-      </div>
-      <a class="ft-url" id="site-link"
-         href="https://black3web.github.io/Blackweb/"
-         target="_blank" rel="noopener noreferrer">
-        <i class="fas fa-globe" aria-hidden="true"></i>
-        <span id="site-label">black3web.github.io</span>
-      </a>
-    </footer>
+    </div>
 
-  </article>
-</main>
+    <!-- قماش المجرة (خلفية ثابتة) -->
+    <canvas id="galaxy-canvas" class="webgl"></canvas>
 
-<script src="main.js"></script>
+    <!-- محتوى الموقع الرئيسي (يظهر بعد التحميل) -->
+    <main id="main-content" style="display: none;">
+        <!-- شريط التنقل (Navbar) -->
+        <nav class="navbar">
+            <ul>
+                <li class="active"><button data-section="home">الرئيسية</button></li>
+                <li><button data-section="projects">المشاريع</button></li>
+                <li><button data-section="contact">تواصل</button></li>
+            </ul>
+        </nav>
+
+        <!-- قسم الصفحة الرئيسية -->
+        <section id="home-section" class="section active-section">
+            <div class="hero glass-liquid electric-border">
+                <div class="banner-wrapper">
+                    <img src="https://iili.io/fb6SvS9.md.jpg" alt="Banner" class="banner-img">
+                </div>
+                <div class="profile-wrapper electric-border-red">
+                    <img src="https://iili.io/fb64ziv.md.jpg" alt="Profile" class="profile-img">
+                </div>
+                <h1 class="fancy-name">ILYA</h1>
+                <p class="arabic-quote">مطور واجهات و ذكاء اصطناعي</p>
+                <p class="english-quote">"Where code meets creativity"</p>
+
+                <!-- قسم التعريف الزجاجي مع الزر -->
+                <div class="glass-info electric-border-moving">
+                    <div class="info-text">
+                        <h3>من أنا</h3>
+                        <p class="arabic-bio">
+                            مبرمج متخصص في تطوير المواقع والتطبيقات بلغات متعددة، وبوتات تلغرام تعمل بخدمات الذكاء الاصطناعي، 
+                            بالإضافة إلى حلول تقنية متكاملة. الجودة والدقة هما شعار عملي.
+                        </p>
+                        <p class="english-bio" style="display:none;">
+                            A programmer specialized in web development, multi-language applications, and AI-powered Telegram bots. 
+                            Quality and precision are my trademarks.
+                        </p>
+                        <button id="translate-btn" class="glow-btn">
+                            <i class="fas fa-language"></i> ترجمة / Translate
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- قسم المشاريع -->
+        <section id="projects-section" class="section">
+            <div class="projects-grid glass-liquid-projects">
+                <!-- بداية المشروع الأول (بوت خدمات ذكاء اصطناعي) -->
+                <div class="project-card" data-project-id="1">
+                    <div class="project-img-wrapper electric-border-red">
+                        <img src="https://picsum.photos/id/1/400/250" alt="AI Bot">
+                    </div>
+                    <h3 class="project-title">بوت خدمات ذكاء اصطناعي</h3>
+                    <p class="project-desc">بوت تلغرام يقدم خدمات توليد النصوص، الصور، والتحليل باستخدام أحدث نماذج AI.</p>
+                    <a href="https://t.me/your_bot_link" class="project-link" target="_blank">رابط القناة / البوت <i class="fas fa-external-link-alt"></i></a>
+                </div>
+                <!-- نهاية المشروع الأول -->
+
+                <!-- بداية المشروع الثاني (موقع خدمات ذكاء اصطناعي) -->
+                <div class="project-card" data-project-id="2">
+                    <div class="project-img-wrapper electric-border-red">
+                        <img src="https://picsum.photos/id/26/400/250" alt="AI Platform">
+                    </div>
+                    <h3 class="project-title">منصة خدمات ذكاء اصطناعي</h3>
+                    <p class="project-desc">موقع ويب متكامل يوفر أدوات ذكاء اصطناعي للمطورين والشركات، مع واجهات API سهلة الاستخدام.</p>
+                    <a href="https://example.com/ai-platform" class="project-link" target="_blank">رابط المنصة <i class="fas fa-external-link-alt"></i></a>
+                </div>
+                <!-- نهاية المشروع الثاني -->
+
+                <!-- هنا يمكنك إضافة مشاريع جديدة بنفس النمط -->
+            </div>
+        </section>
+
+        <!-- قسم التواصل والروابط -->
+        <section id="contact-section" class="section">
+            <div class="contact-grid glass-liquid-lead">
+                <!-- روابط التواصل -->
+                <div class="social-links-group">
+                    <a href="https://t.me/swc_t" class="social-link" target="_blank"><i class="fab fa-telegram"></i> قناة تلغرام</a>
+                    <a href="https://t.me/ILYA3bot" class="social-link" target="_blank"><i class="fab fa-telegram-plane"></i> تواصل عبر تلغرام</a>
+                    <a href="https://instagram.com/szc2v" class="social-link" target="_blank"><i class="fab fa-instagram"></i> انستغرام</a>
+                    <a href="https://youtube.com/@scv_t" class="social-link" target="_blank"><i class="fab fa-youtube"></i> يوتيوب</a>
+                </div>
+                <div class="contact-desc">
+                    <p>Connect with me on social media for updates and inquiries.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- عداد الزوار (أسفل كل الصفحات) -->
+        <div class="visitor-counter glass-liquid-small">
+            <i class="fas fa-eye"></i> عدد الزوار الحقيقي: <span id="visitor-count">0</span>
+        </div>
+    </main>
+
+    <!-- svg distortion filters للزجاج السائل -->
+    <svg style="display: none;">
+        <filter id="glass-distortion" x="-20%" y="-20%" width="140%" height="140%" filterUnits="objectBoundingBox">
+            <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="2" result="noise" />
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="25" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+    </svg>
+
+    <script src="script.js" type="module"></script>
 </body>
 </html>
