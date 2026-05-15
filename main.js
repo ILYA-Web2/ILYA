@@ -1,394 +1,246 @@
-/* Reset & Base */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ==================== 1. GALAXY BACKGROUND (FULL FEATURES) ====================
+const canvas = document.getElementById('galaxy-canvas');
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+camera.position.set(3, 3, 3);
+const renderer = new THREE.WebGLRenderer({ canvas, alpha: false });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
+
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+controls.autoRotate = false;
+controls.enableZoom = false;
+controls.enablePan = false;
+
+// Galaxy parameters
+const parameters = {
+    count: 100000,
+    size: 0.012,
+    radius: 2.2,
+    branches: 3,
+    spin: 2.5,
+    randomness: 4,
+    randomnessPower: 3.5,
+    insideColor: '#ff6030',
+    outsideColor: '#0949f0'
+};
+let galaxyGeometry, galaxyMaterial, galaxyPoints;
+
+function generateGalaxy() {
+    if (galaxyPoints) {
+        galaxyGeometry.dispose();
+        galaxyMaterial.dispose();
+        scene.remove(galaxyPoints);
+    }
+    galaxyGeometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(parameters.count * 3);
+    const colors = new Float32Array(parameters.count * 3);
+    const colorInside = new THREE.Color(parameters.insideColor);
+    const colorOutside = new THREE.Color(parameters.outsideColor);
+
+    for (let i = 0; i < parameters.count; i++) {
+        const r = Math.pow(Math.random(), 1.5) * parameters.radius;
+        const spinAngle = r * parameters.spin;
+        const branchAngle = ((i % parameters.branches) / parameters.branches) * Math.PI * 2;
+        const randX = (Math.random() - 0.5) * parameters.randomness * Math.pow(Math.random(), parameters.randomnessPower);
+        const randY = (Math.random() - 0.5) * parameters.randomness * 0.8;
+        const randZ = (Math.random() - 0.5) * parameters.randomness * Math.pow(Math.random(), parameters.randomnessPower);
+        
+        const x = Math.cos(branchAngle + spinAngle) * r + randX;
+        const y = randY;
+        const z = Math.sin(branchAngle + spinAngle) * r + randZ;
+        positions[i*3] = x;
+        positions[i*3+1] = y;
+        positions[i*3+2] = z;
+        
+        const mixedColor = colorInside.clone().lerp(colorOutside, r / parameters.radius);
+        colors[i*3] = mixedColor.r;
+        colors[i*3+1] = mixedColor.g;
+        colors[i*3+2] = mixedColor.b;
+    }
+    galaxyGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    galaxyGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    galaxyMaterial = new THREE.PointsMaterial({ size: parameters.size, vertexColors: true, blending: THREE.AdditiveBlending });
+    galaxyPoints = new THREE.Points(galaxyGeometry, galaxyMaterial);
+    scene.add(galaxyPoints);
+}
+generateGalaxy();
+
+// Animation loop for galaxy rotation
+let time = 0;
+function animateGalaxy() {
+    requestAnimationFrame(animateGalaxy);
+    time += 0.002;
+    camera.position.x = Math.sin(time * 0.2) * 3.5;
+    camera.position.z = Math.cos(time * 0.3) * 3.5;
+    camera.lookAt(0, 0, 0);
+    controls.update();
+    renderer.render(scene, camera);
+}
+animateGalaxy();
+
+window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// ==================== 2. LOADING SCREEN SIMULATION ====================
+let loadProgress = 0;
+const loadingBar = document.getElementById('loading-bar');
+const loadingScreen = document.getElementById('loading-screen');
+const mainContent = document.getElementById('main-content');
+
+const interval = setInterval(() => {
+    loadProgress += Math.random() * 20;
+    if (loadProgress >= 100) {
+        loadProgress = 100;
+        clearInterval(interval);
+        setTimeout(() => {
+            loadingScreen.style.opacity = '0';
+            setTimeout(() => {
+                loadingScreen.style.display = 'none';
+                mainContent.style.display = 'block';
+                // start visitor counter after load
+                initVisitorCounter();
+                // init navbar movement
+                initNavbar();
+                // init translation
+                initTranslation();
+                // init social hover as file 6
+                initSocialHover();
+            }, 1000);
+        }, 500);
+    }
+    loadingBar.style.width = loadProgress + '%';
+}, 100);
+
+// ==================== 3. NAVBAR ACTIVE LINE (FILE 2 STYLE) ====================
+function initNavbar() {
+    const nav = document.querySelector('.navbar');
+    const btns = document.querySelectorAll('.navbar ul li button');
+    const activeLine = document.createElement('div');
+    activeLine.style.position = 'absolute';
+    activeLine.style.bottom = '-2px';
+    activeLine.style.height = '3px';
+    activeLine.style.backgroundColor = '#ff0040';
+    activeLine.style.borderRadius = '2px';
+    activeLine.style.transition = '0.3s';
+    nav.style.position = 'relative';
+    nav.appendChild(activeLine);
+    
+    function updateActiveLine(activeBtn) {
+        const left = activeBtn.offsetLeft;
+        const width = activeBtn.offsetWidth;
+        activeLine.style.left = left + 'px';
+        activeLine.style.width = width + 'px';
+    }
+    btns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const parentLi = btn.parentElement;
+            if(parentLi.classList.contains('active')) return;
+            document.querySelectorAll('.navbar ul li').forEach(li => li.classList.remove('active'));
+            parentLi.classList.add('active');
+            updateActiveLine(btn);
+            // switch sections
+            const sectionId = btn.dataset.section;
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active-section'));
+            document.getElementById(`${sectionId}-section`).classList.add('active-section');
+        });
+    });
+    const initialActive = document.querySelector('.navbar ul li.active button');
+    if(initialActive) updateActiveLine(initialActive);
 }
 
-:root {
-    --neon-red: #ff0040;
-    --neon-red-dark: #b00030;
-    --neon-red-glow: 0 0 5px #ff0040, 0 0 20px #ff0040, 0 0 40px #ff0040;
-    --glass-bg: rgba(255, 255, 255, 0.08);
-    --glass-border: rgba(255, 255, 255, 0.2);
-    --transition-smooth: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+// ==================== 4. TRANSLATION BUTTON (EN/AR) ====================
+function initTranslation() {
+    const translateBtn = document.getElementById('translate-btn');
+    let isArabic = true;
+    const arabicBio = document.querySelector('.arabic-bio');
+    const englishBio = document.querySelector('.english-bio');
+    const arabicQuote = document.querySelector('.arabic-quote');
+    const englishQuote = document.querySelector('.english-quote');
+    translateBtn.addEventListener('click', () => {
+        if(isArabic) {
+            arabicBio.style.display = 'none';
+            englishBio.style.display = 'block';
+            arabicQuote.style.display = 'none';
+            englishQuote.style.display = 'block';
+            translateBtn.innerHTML = '<i class="fas fa-language"></i> عرض بالعربية';
+        } else {
+            arabicBio.style.display = 'block';
+            englishBio.style.display = 'none';
+            arabicQuote.style.display = 'block';
+            englishQuote.style.display = 'none';
+            translateBtn.innerHTML = '<i class="fas fa-language"></i> ترجمة / Translate';
+        }
+        isArabic = !isArabic;
+    });
 }
 
-body {
-    font-family: 'Cairo', 'Inter', sans-serif;
-    background-color: #000;
-    color: white;
-    overflow-x: hidden;
-    min-height: 100vh;
+// ==================== 5. SOCIAL ICONS HOVER & RIPPLE (FILE 6 MOD) ====================
+function initSocialHover() {
+    const socialLinks = document.querySelectorAll('.social-link');
+    socialLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const ripple = document.createElement('span');
+            ripple.className = 'ripple-effect';
+            ripple.style.position = 'absolute';
+            ripple.style.width = '10px';
+            ripple.style.height = '10px';
+            ripple.style.borderRadius = '50%';
+            ripple.style.backgroundColor = '#ff0040';
+            ripple.style.transform = 'scale(0)';
+            ripple.style.transition = 'transform 0.6s, opacity 0.6s';
+            ripple.style.opacity = '0.8';
+            ripple.style.pointerEvents = 'none';
+            const rect = link.getBoundingClientRect();
+            ripple.style.left = (rect.left + rect.width/2) + 'px';
+            ripple.style.top = (rect.top + rect.height/2) + 'px';
+            document.body.appendChild(ripple);
+            setTimeout(() => { ripple.style.transform = 'scale(30)'; ripple.style.opacity = '0'; }, 10);
+            setTimeout(() => { ripple.remove(); }, 700);
+            setTimeout(() => { window.open(link.href, '_blank'); }, 1500);
+        });
+    });
 }
 
-/* Galaxy Canvas */
-#galaxy-canvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-    outline: none;
+// ==================== 6. VISITOR COUNTER (real-time, increments on each load) ====================
+async function initVisitorCounter() {
+    // using a simple free API: countapi.xyz for demo (real-time + persistent)
+    // but to make it increment on each load, we use localStorage + fetch to a mock or real endpoint
+    // For simplicity, I'll implement a robust solution: GoatCounter alternative? Actually we'll use a free counter API.
+    const counterSpan = document.getElementById('visitor-count');
+    const key = 'portfolio_visitor_count';
+    try {
+        let count = localStorage.getItem(key);
+        if(count === null) {
+            count = 1;
+        } else {
+            count = parseInt(count) + 1;
+        }
+        localStorage.setItem(key, count);
+        counterSpan.innerText = count;
+        // optional: sync with server if needed (but local works as demo)
+        // To make it "real-time" across devices, one would need backend, but localStorage works per device.
+        // I'll add a fetch to increment on a public API for global demo.
+        const response = await fetch('https://api.countapi.xyz/update/ilya/visits/?amount=1');
+        const data = await response.json();
+        if(data && data.value) counterSpan.innerText = data.value;
+        else counterSpan.innerText = count;
+    } catch(e) {
+        counterSpan.innerText = localStorage.getItem(key) || 1;
+    }
 }
 
-/* Loading Screen */
-#loading-screen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: black;
-    z-index: 10000;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    backdrop-filter: blur(5px);
-    transition: opacity 1s ease;
-}
-.loading-content {
-    text-align: center;
-}
-.loading-logo {
-    width: 150px;
-    border-radius: 20px;
-    margin-bottom: 30px;
-    box-shadow: 0 0 20px var(--neon-red);
-}
-.loading-bar-container {
-    width: 280px;
-    height: 4px;
-    background: #333;
-    border-radius: 4px;
-    overflow: hidden;
-}
-.loading-bar {
-    width: 0%;
-    height: 100%;
-    background: var(--neon-red);
-    box-shadow: var(--neon-red-glow);
-    transition: width 0.3s linear;
-}
+// ==================== 7. ADDITIONAL: PROJECT CARDS FLEXIBLE ADD/REMOVE ====================
+// Just a comment to show you where to add new projects inside HTML.
+// In HTML, inside <div class="projects-grid">, copy the block from <!-- بداية المشروع الأول --> to <!-- نهاية المشروع الأول --> and change data-project-id, title, desc, link.
+// Also ensure the image link changes.
 
-/* Main Content */
-#main-content {
-    position: relative;
-    z-index: 2;
-    padding-top: 90px;
-    padding-bottom: 80px;
-}
-
-/* Navbar (رقم 2 - أحمر نيوني) */
-.navbar {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
-    background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(10px);
-    border-radius: 50px;
-    padding: 5px 20px;
-    border: 1px solid var(--neon-red);
-}
-.navbar ul {
-    display: flex;
-    gap: 40px;
-    list-style: none;
-}
-.navbar ul li button {
-    background: none;
-    border: none;
-    color: white;
-    font-family: 'Inter', sans-serif;
-    font-weight: 600;
-    font-size: 1rem;
-    padding: 10px 0;
-    cursor: pointer;
-    transition: 0.3s;
-}
-.navbar ul li.active button {
-    color: var(--neon-red);
-    text-shadow: 0 0 8px var(--neon-red);
-}
-/* Active indicator line */
-.navbar::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    width: var(--active-width, 60px);
-    height: 3px;
-    background: var(--neon-red);
-    border-radius: 2px;
-    transition: 0.3s ease;
-    transform: translateX(var(--active-left, 0));
-}
-
-/* Sections */
-.section {
-    display: none;
-    opacity: 0;
-    transition: opacity 0.5s;
-}
-.section.active-section {
-    display: block;
-    opacity: 1;
-}
-
-/* Glass Liquid (رقم 5) */
-.glass-liquid, .glass-liquid-projects, .glass-liquid-lead, .glass-liquid-small {
-    backdrop-filter: blur(12px);
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    border-radius: 32px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-    transition: var(--transition-smooth);
-}
-.electric-border {
-    border: 2px solid transparent;
-    animation: electricPulse 2s infinite alternate;
-}
-@keyframes electricPulse {
-    0% { border-color: rgba(255,0,64,0.3); box-shadow: 0 0 5px rgba(255,0,64,0.2);}
-    100% { border-color: var(--neon-red); box-shadow: 0 0 25px var(--neon-red);}
-}
-.electric-border-red {
-    border: 2px solid var(--neon-red);
-    border-radius: 28px;
-    transition: all 0.3s;
-}
-.electric-border-moving {
-    border: 2px solid var(--neon-red);
-    animation: borderMove 3s linear infinite;
-}
-@keyframes borderMove {
-    0% { border-color: var(--neon-red); box-shadow: 0 0 5px var(--neon-red);}
-    50% { border-color: #ff80a0; box-shadow: 0 0 20px #ff80a0;}
-    100% { border-color: var(--neon-red); box-shadow: 0 0 5px var(--neon-red);}
-}
-
-/* Hero Section */
-.hero {
-    width: 85%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 30px 20px 50px;
-    position: relative;
-    text-align: center;
-}
-.banner-wrapper {
-    width: 100%;
-    margin-bottom: 40px;
-}
-.banner-img {
-    width: 100%;
-    max-height: 350px;
-    object-fit: cover;
-    border-radius: 24px;
-    display: block;
-}
-.profile-wrapper {
-    width: 160px;
-    height: 160px;
-    border-radius: 50%;
-    margin: -80px auto 20px;
-    background: #000;
-    padding: 5px;
-    transform: translateY(0);
-}
-.profile-img {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-}
-.fancy-name {
-    font-size: 4rem;
-    font-weight: 800;
-    background: linear-gradient(45deg, #fff, var(--neon-red));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    letter-spacing: 4px;
-    margin: 10px 0;
-}
-.arabic-quote {
-    font-size: 1.3rem;
-    color: #ddd;
-}
-.english-quote {
-    font-size: 1rem;
-    color: #aaa;
-    margin-bottom: 30px;
-}
-
-/* Glass Info with moving border */
-.glass-info {
-    max-width: 800px;
-    margin: 30px auto;
-    padding: 30px;
-    border-radius: 40px;
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(15px);
-}
-.info-text h3 {
-    font-size: 2rem;
-    margin-bottom: 15px;
-    color: var(--neon-red);
-}
-.arabic-bio, .english-bio {
-    font-size: 1.1rem;
-    line-height: 1.8;
-    margin-bottom: 20px;
-}
-.glow-btn {
-    background: transparent;
-    border: 1px solid var(--neon-red);
-    color: var(--neon-red);
-    padding: 10px 20px;
-    border-radius: 40px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
-.glow-btn:hover {
-    background: var(--neon-red);
-    color: black;
-    box-shadow: 0 0 20px var(--neon-red);
-}
-
-/* Projects Grid */
-.projects-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 40px;
-    width: 90%;
-    max-width: 1300px;
-    margin: 0 auto;
-    padding: 30px;
-    border-radius: 48px;
-}
-.project-card {
-    background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(10px);
-    border-radius: 32px;
-    overflow: hidden;
-    padding: 20px;
-    transition: transform 0.3s;
-}
-.project-card:hover {
-    transform: translateY(-8px);
-}
-.project-img-wrapper {
-    border-radius: 24px;
-    overflow: hidden;
-    margin-bottom: 15px;
-}
-.project-img-wrapper img {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-    transition: 0.5s;
-}
-.project-img-wrapper img:hover {
-    transform: scale(1.05);
-}
-.project-title {
-    font-size: 1.6rem;
-    margin: 15px 0 10px;
-    color: var(--neon-red);
-}
-.project-desc {
-    font-size: 0.95rem;
-    opacity: 0.8;
-    margin-bottom: 20px;
-}
-.project-link {
-    color: white;
-    text-decoration: none;
-    border-bottom: 1px solid var(--neon-red);
-    transition: 0.3s;
-}
-.project-link:hover {
-    color: var(--neon-red);
-}
-
-/* Contact Section Grid */
-.contact-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 40px;
-    width: 90%;
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 40px;
-    border-radius: 48px;
-}
-.social-links-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
-}
-.social-link {
-    background: rgba(255,255,255,0.1);
-    padding: 12px 24px;
-    border-radius: 50px;
-    color: white;
-    text-decoration: none;
-    font-weight: 600;
-    transition: 0.3s;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    border: 1px solid transparent;
-}
-.social-link:hover {
-    border-color: var(--neon-red);
-    color: var(--neon-red);
-    transform: scale(1.05);
-}
-.contact-desc {
-    text-align: center;
-    max-width: 300px;
-}
-
-/* Visitor Counter */
-.visitor-counter {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(8px);
-    padding: 8px 16px;
-    border-radius: 40px;
-    font-size: 0.9rem;
-    font-weight: bold;
-    z-index: 100;
-    border-left: 3px solid var(--neon-red);
-    color: #eee;
-}
-.visitor-counter i {
-    color: var(--neon-red);
-    margin-right: 6px;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .navbar ul { gap: 20px; }
-    .fancy-name { font-size: 2.5rem; }
-    .hero { width: 95%; padding: 20px 15px; }
-    .profile-wrapper { width: 120px; height: 120px; margin-top: -60px; }
-    .glass-info { padding: 20px; }
-    .projects-grid { grid-template-columns: 1fr; gap: 25px; }
-    .contact-grid { flex-direction: column; align-items: center; }
-    .visitor-counter { bottom: 10px; right: 10px; font-size: 0.75rem; }
-}
+console.log('Website fully loaded with galaxy, glass, neon red, translation, ripple delay, and visitor counter');
