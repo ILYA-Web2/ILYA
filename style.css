@@ -1,4 +1,4 @@
-/* Reset & Base */
+/* ========== RESET & GLOBALS ========== */
 * {
     margin: 0;
     padding: 0;
@@ -7,22 +7,23 @@
 
 :root {
     --neon-red: #ff0040;
-    --neon-red-dark: #b00030;
-    --neon-red-glow: 0 0 5px #ff0040, 0 0 20px #ff0040, 0 0 40px #ff0040;
-    --glass-bg: rgba(255, 255, 255, 0.08);
-    --glass-border: rgba(255, 255, 255, 0.2);
-    --transition-smooth: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+    --neon-red-soft: #ff3366;
+    --neon-red-glow: 0 0 5px #ff0040, 0 0 15px #ff0040, 0 0 30px rgba(255,0,64,0.5);
+    --glass-bg: rgba(20, 20, 30, 0.45);
+    --glass-border: rgba(255,255,255,0.2);
+    --transition-smooth: all 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
 }
 
 body {
-    font-family: 'Cairo', 'Inter', sans-serif;
+    font-family: 'Almarai', 'Inter', sans-serif;
     background-color: #000;
     color: white;
     overflow-x: hidden;
     min-height: 100vh;
+    direction: rtl;
 }
 
-/* Galaxy Canvas */
+/* ========== GALAXY CANVAS (ملف 1 كامل) ========== */
 #galaxy-canvas {
     position: fixed;
     top: 0;
@@ -31,104 +32,106 @@ body {
     height: 100%;
     z-index: 0;
     outline: none;
+    display: block;
 }
 
-/* Loading Screen */
+/* ========== LOADING SCREEN (الصورة + شريط تحميل أحمر) ========== */
 #loading-screen {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: black;
+    background: #000;
     z-index: 10000;
     display: flex;
     justify-content: center;
     align-items: center;
-    flex-direction: column;
-    backdrop-filter: blur(5px);
-    transition: opacity 1s ease;
+    backdrop-filter: blur(8px);
+    transition: opacity 0.8s ease;
 }
-.loading-content {
+.loading-card {
     text-align: center;
+    background: rgba(0,0,0,0.6);
+    border-radius: 30px;
+    padding: 30px 40px;
+    border: 1px solid var(--neon-red-soft);
 }
 .loading-logo {
     width: 150px;
     border-radius: 20px;
-    margin-bottom: 30px;
-    box-shadow: 0 0 20px var(--neon-red);
+    margin-bottom: 25px;
+    box-shadow: 0 0 15px var(--neon-red);
 }
-.loading-bar-container {
-    width: 280px;
-    height: 4px;
-    background: #333;
-    border-radius: 4px;
+.neon-loading-bar {
+    width: 260px;
+    height: 5px;
+    background: #222;
+    border-radius: 10px;
     overflow: hidden;
+    margin-top: 15px;
 }
-.loading-bar {
+.neon-bar-fill {
     width: 0%;
     height: 100%;
     background: var(--neon-red);
     box-shadow: var(--neon-red-glow);
-    transition: width 0.3s linear;
+    transition: width 0.2s linear;
 }
 
-/* Main Content */
+/* ========== MAIN CONTENT ========== */
 #main-content {
     position: relative;
     z-index: 2;
-    padding-top: 90px;
-    padding-bottom: 80px;
+    padding-top: 100px;
+    padding-bottom: 90px;
 }
 
-/* Navbar (رقم 2 - أحمر نيوني) */
+/* ========== NAVBAR (دمج ملف 2 + 4) ========== */
 .navbar {
     position: fixed;
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 1000;
-    background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(10px);
-    border-radius: 50px;
-    padding: 5px 20px;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(12px);
+    border-radius: 60px;
+    padding: 8px 28px;
     border: 1px solid var(--neon-red);
+    box-shadow: 0 0 15px rgba(255,0,64,0.3);
 }
 .navbar ul {
     display: flex;
-    gap: 40px;
+    gap: 50px;
     list-style: none;
 }
 .navbar ul li button {
     background: none;
     border: none;
-    color: white;
+    color: #eee;
     font-family: 'Inter', sans-serif;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 1rem;
     padding: 10px 0;
     cursor: pointer;
-    transition: 0.3s;
+    transition: 0.2s;
 }
 .navbar ul li.active button {
     color: var(--neon-red);
     text-shadow: 0 0 8px var(--neon-red);
 }
-/* Active indicator line */
-.navbar::after {
-    content: '';
+.nav-active-indicator {
     position: absolute;
     bottom: -2px;
-    left: 0;
-    width: var(--active-width, 60px);
     height: 3px;
     background: var(--neon-red);
-    border-radius: 2px;
-    transition: 0.3s ease;
-    transform: translateX(var(--active-left, 0));
+    border-radius: 3px;
+    transition: 0.25s ease;
+    box-shadow: var(--neon-red-glow);
 }
 
-/* Sections */
+/* ========== SECTIONS ========== */
 .section {
     display: none;
     opacity: 0;
@@ -139,66 +142,77 @@ body {
     opacity: 1;
 }
 
-/* Glass Liquid (رقم 5) */
-.glass-liquid, .glass-liquid-projects, .glass-liquid-lead, .glass-liquid-small {
-    backdrop-filter: blur(12px);
+/* ========== EFFECTS GLASS & ELECTRIC (ملف 3 و 5) ========== */
+.glass-liquid {
+    backdrop-filter: blur(14px);
     background: var(--glass-bg);
     border: 1px solid var(--glass-border);
-    border-radius: 32px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    border-radius: 38px;
     transition: var(--transition-smooth);
 }
-.electric-border {
-    border: 2px solid transparent;
-    animation: electricPulse 2s infinite alternate;
-}
-@keyframes electricPulse {
-    0% { border-color: rgba(255,0,64,0.3); box-shadow: 0 0 5px rgba(255,0,64,0.2);}
-    100% { border-color: var(--neon-red); box-shadow: 0 0 25px var(--neon-red);}
-}
-.electric-border-red {
-    border: 2px solid var(--neon-red);
-    border-radius: 28px;
-    transition: all 0.3s;
-}
 .electric-border-moving {
-    border: 2px solid var(--neon-red);
-    animation: borderMove 3s linear infinite;
+    border: 2px solid transparent;
+    animation: electricFloat 2.5s infinite alternate;
 }
-@keyframes borderMove {
-    0% { border-color: var(--neon-red); box-shadow: 0 0 5px var(--neon-red);}
-    50% { border-color: #ff80a0; box-shadow: 0 0 20px #ff80a0;}
-    100% { border-color: var(--neon-red); box-shadow: 0 0 5px var(--neon-red);}
+@keyframes electricFloat {
+    0% { border-color: rgba(255,0,64,0.3); box-shadow: 0 0 8px rgba(255,0,64,0.2);}
+    100% { border-color: var(--neon-red); box-shadow: 0 0 28px var(--neon-red);}
+}
+.electric-border-soft {
+    border: 2px solid var(--neon-red-soft);
+    border-radius: 50%;
+    box-shadow: 0 0 12px rgba(255,51,102,0.5);
+    transition: 0.3s;
+}
+.electric-border-static {
+    border: 1px solid var(--neon-red);
+    border-radius: 38px;
+}
+.glass-liquid-red {
+    backdrop-filter: blur(12px);
+    background: rgba(30,0,15,0.5);
+    border: 1px solid var(--neon-red);
+}
+.glass-liquid-lead {
+    backdrop-filter: blur(10px);
+    background: rgba(25,25,40,0.55);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 48px;
+}
+.glass-liquid-small {
+    backdrop-filter: blur(8px);
+    background: rgba(0,0,0,0.6);
+    border-radius: 50px;
+    padding: 6px 14px;
+    font-size: 0.8rem;
 }
 
-/* Hero Section */
-.hero {
-    width: 85%;
+/* ========== HERO SECTION (الصفحة الرئيسية) ========== */
+.hero-container {
+    width: 90%;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 30px 20px 50px;
-    position: relative;
+    padding: 25px 20px 45px;
     text-align: center;
 }
-.banner-wrapper {
+.banner-area {
     width: 100%;
-    margin-bottom: 40px;
+    margin-bottom: 30px;
 }
-.banner-img {
+.banner-full-img {
     width: 100%;
-    max-height: 350px;
+    max-height: 340px;
     object-fit: cover;
-    border-radius: 24px;
+    border-radius: 28px;
     display: block;
 }
-.profile-wrapper {
-    width: 160px;
-    height: 160px;
-    border-radius: 50%;
-    margin: -80px auto 20px;
+.profile-area {
+    width: 150px;
+    height: 150px;
+    margin: -65px auto 15px;
     background: #000;
-    padding: 5px;
-    transform: translateY(0);
+    padding: 4px;
+    border-radius: 50%;
 }
 .profile-img {
     width: 100%;
@@ -207,49 +221,55 @@ body {
     object-fit: cover;
 }
 .fancy-name {
-    font-size: 4rem;
+    font-size: 4.2rem;
     font-weight: 800;
-    background: linear-gradient(45deg, #fff, var(--neon-red));
+    background: linear-gradient(135deg, #fff, var(--neon-red));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    letter-spacing: 4px;
-    margin: 10px 0;
+    letter-spacing: 3px;
+    margin: 10px 0 5px;
 }
-.arabic-quote {
-    font-size: 1.3rem;
+.arabic-name {
+    font-family: 'Almarai', sans-serif;
+    font-size: 1.8rem;
     color: #ddd;
+    margin-bottom: 5px;
 }
 .english-quote {
-    font-size: 1rem;
-    color: #aaa;
-    margin-bottom: 30px;
-}
-
-/* Glass Info with moving border */
-.glass-info {
-    max-width: 800px;
-    margin: 30px auto;
-    padding: 30px;
-    border-radius: 40px;
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(15px);
-}
-.info-text h3 {
-    font-size: 2rem;
-    margin-bottom: 15px;
-    color: var(--neon-red);
-}
-.arabic-bio, .english-bio {
     font-size: 1.1rem;
+    color: #aaa;
+    font-style: italic;
+}
+.glass-about {
+    max-width: 750px;
+    margin: 35px auto 0;
+    padding: 28px 24px;
+    border-radius: 48px;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(18px);
+    position: relative;
+    border: 2px solid transparent;
+    animation: rotateBorder 8s linear infinite;
+}
+@keyframes rotateBorder {
+    0% { border-color: #ff0040; box-shadow: 0 0 10px #ff0040;}
+    25% { border-color: #ff80a0; box-shadow: 0 0 20px #ff80a0;}
+    50% { border-color: #ff0040; box-shadow: 0 0 10px #ff0040;}
+    75% { border-color: #ff3366; box-shadow: 0 0 20px #ff3366;}
+    100% { border-color: #ff0040; box-shadow: 0 0 10px #ff0040;}
+}
+.arabic-about, .english-about {
+    font-size: 1.05rem;
     line-height: 1.8;
     margin-bottom: 20px;
+    color: #f0f0f0;
 }
-.glow-btn {
+.glow-translate-btn {
     background: transparent;
     border: 1px solid var(--neon-red);
     color: var(--neon-red);
-    padding: 10px 20px;
+    padding: 8px 20px;
     border-radius: 40px;
     font-weight: bold;
     cursor: pointer;
@@ -257,138 +277,130 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    font-size: 0.9rem;
 }
-.glow-btn:hover {
+.glow-translate-btn:hover {
     background: var(--neon-red);
-    color: black;
-    box-shadow: 0 0 20px var(--neon-red);
+    color: #000;
+    box-shadow: 0 0 18px var(--neon-red);
 }
 
-/* Projects Grid */
-.projects-grid {
+/* ========== PROJECTS SECTION (قابل للإضافة) ========== */
+.projects-wrapper {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 40px;
     width: 90%;
     max-width: 1300px;
     margin: 0 auto;
-    padding: 30px;
-    border-radius: 48px;
+    padding: 35px 30px;
 }
-.project-card {
-    background: rgba(0,0,0,0.5);
-    backdrop-filter: blur(10px);
+.project-item {
+    background: rgba(10,10,20,0.7);
+    backdrop-filter: blur(8px);
     border-radius: 32px;
-    overflow: hidden;
     padding: 20px;
     transition: transform 0.3s;
 }
-.project-card:hover {
-    transform: translateY(-8px);
+.project-item:hover {
+    transform: translateY(-6px);
 }
-.project-img-wrapper {
-    border-radius: 24px;
+.project-image {
+    border-radius: 28px;
     overflow: hidden;
-    margin-bottom: 15px;
+    margin-bottom: 18px;
 }
-.project-img-wrapper img {
+.project-image img {
     width: 100%;
     height: 200px;
     object-fit: cover;
-    transition: 0.5s;
+    transition: 0.4s;
 }
-.project-img-wrapper img:hover {
+.project-image img:hover {
     transform: scale(1.05);
 }
 .project-title {
     font-size: 1.6rem;
-    margin: 15px 0 10px;
     color: var(--neon-red);
+    margin: 12px 0 8px;
 }
 .project-desc {
-    font-size: 0.95rem;
-    opacity: 0.8;
-    margin-bottom: 20px;
+    font-size: 0.9rem;
+    opacity: 0.85;
+    margin-bottom: 18px;
 }
 .project-link {
     color: white;
     text-decoration: none;
     border-bottom: 1px solid var(--neon-red);
-    transition: 0.3s;
+    transition: 0.2s;
 }
 .project-link:hover {
     color: var(--neon-red);
 }
 
-/* Contact Section Grid */
-.contact-grid {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 40px;
+/* ========== CONTACT & SOCIAL (تأثير تموج وتأخير مثل ملف 6) ========== */
+.contact-glass {
     width: 90%;
     max-width: 1000px;
     margin: 0 auto;
-    padding: 40px;
-    border-radius: 48px;
+    padding: 35px 25px;
+    text-align: center;
 }
-.social-links-group {
+.social-grid {
     display: flex;
     flex-wrap: wrap;
-    gap: 20px;
     justify-content: center;
+    gap: 25px;
+    margin-bottom: 20px;
 }
-.social-link {
-    background: rgba(255,255,255,0.1);
-    padding: 12px 24px;
-    border-radius: 50px;
-    color: white;
+.social-ripple-link {
+    position: relative;
+    background: rgba(255,255,255,0.08);
+    padding: 12px 28px;
+    border-radius: 60px;
+    color: #fff;
     text-decoration: none;
     font-weight: 600;
-    transition: 0.3s;
+    transition: 0.2s;
+    border: 1px solid transparent;
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    border: 1px solid transparent;
+    gap: 8px;
 }
-.social-link:hover {
+.social-ripple-link:hover {
     border-color: var(--neon-red);
     color: var(--neon-red);
-    transform: scale(1.05);
 }
-.contact-desc {
-    text-align: center;
-    max-width: 300px;
+.contact-desc-en {
+    font-size: 0.9rem;
+    color: #ccc;
 }
 
-/* Visitor Counter */
-.visitor-counter {
+/* ========== VISITOR COUNTER ========== */
+.visitor-badge {
     position: fixed;
     bottom: 20px;
     right: 20px;
+    z-index: 99;
     background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(8px);
-    padding: 8px 16px;
-    border-radius: 40px;
-    font-size: 0.9rem;
-    font-weight: bold;
-    z-index: 100;
     border-left: 3px solid var(--neon-red);
-    color: #eee;
+    direction: ltr;
 }
-.visitor-counter i {
+.visitor-badge i {
     color: var(--neon-red);
-    margin-right: 6px;
+    margin-left: 6px;
 }
 
-/* Responsive */
+/* ========== RESPONSIVE (جوال/لابتوب) ========== */
 @media (max-width: 768px) {
     .navbar ul { gap: 20px; }
     .fancy-name { font-size: 2.5rem; }
-    .hero { width: 95%; padding: 20px 15px; }
-    .profile-wrapper { width: 120px; height: 120px; margin-top: -60px; }
-    .glass-info { padding: 20px; }
-    .projects-grid { grid-template-columns: 1fr; gap: 25px; }
-    .contact-grid { flex-direction: column; align-items: center; }
-    .visitor-counter { bottom: 10px; right: 10px; font-size: 0.75rem; }
+    .hero-container { width: 95%; padding: 20px 12px; }
+    .profile-area { width: 110px; height: 110px; margin-top: -50px; }
+    .glass-about { padding: 20px; }
+    .projects-wrapper { grid-template-columns: 1fr; gap: 25px; }
+    .social-grid { gap: 12px; }
+    .social-ripple-link { padding: 8px 16px; font-size: 0.8rem; }
+    .visitor-badge { bottom: 10px; right: 10px; font-size: 0.7rem; }
 }
