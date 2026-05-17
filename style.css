@@ -1,0 +1,469 @@
+/* =========================================
+   1. الإعدادات العامة والمتغيرات
+   ========================================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --neon-red: #ff0000;
+    --neon-red-glow: #ff3131;
+    --dark-neon: #8b0000;
+    --bg: #151F28; /* لون الخلفية الأصلي من ملفك ليعمل مع الأيقونات */
+    --glass-bg: rgba(20, 0, 0, 0.45); /* زجاج سائل أحمر داكن */
+    --grey-glass-bg: rgba(50, 50, 50, 0.4);
+    --text-light: #ffffff;
+    --text-dark: #050505;
+}
+
+body {
+    background-color: #050505;
+    color: var(--text-light);
+    overflow-x: hidden;
+    font-family: 'Reem Kufi', sans-serif;
+}
+
+.ar { font-family: 'Reem Kufi', sans-serif; }
+.en { font-family: 'Cinzel', serif; }
+.hidden { display: none !important; }
+
+/* =========================================
+   2. شاشة التحميل والمجرة
+   ========================================= */
+#galaxy-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+}
+
+#preloader {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    background: transparent;
+    backdrop-filter: blur(15px);
+    transition: opacity 0.5s ease;
+}
+
+.preloader-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.preloader-logo {
+    width: 150px;
+    height: 150px;
+    border-radius: 20px;
+    object-fit: cover;
+}
+
+.preloader-bar {
+    width: 250px;
+    height: 4px;
+    background: rgba(255, 0, 0, 0.2);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 0 10px var(--neon-red);
+}
+
+.preloader-strike {
+    width: 0%;
+    height: 100%;
+    background: var(--neon-red);
+    box-shadow: 0 0 20px var(--neon-red-glow);
+    animation: loadBar 2s ease-in-out forwards;
+}
+
+@keyframes loadBar {
+    0% { width: 0; }
+    50% { width: 80%; }
+    100% { width: 100%; }
+}
+
+/* =========================================
+   3. الإطارات الكهربائية الدائمة والزجاج السائل
+   ========================================= */
+.electric-border {
+    border: 2px solid rgba(255, 0, 0, 0.8);
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.6), inset 0 0 15px rgba(255, 0, 0, 0.6);
+    filter: url('#electric-border-filter'); /* تطبيق فلتر الـ SVG الدائم */
+}
+
+.liquid-glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 0, 0, 0.3);
+    box-shadow: 0 8px 32px 0 rgba(139, 0, 0, 0.37);
+}
+
+.liquid-grey-glass {
+    background: var(--grey-glass-bg);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+    padding: 20px;
+    border-radius: 15px;
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+/* =========================================
+   4. شريط التنقل (مجهز لكود الـ GSAP الخاص بك)
+   ========================================= */
+.neon-nav {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    background: var(--glass-bg);
+    backdrop-filter: blur(15px);
+    margin: 20px auto;
+    border-radius: 50px;
+    width: max-content;
+    padding: 10px 20px;
+    z-index: 100;
+    border: 1px solid rgba(255, 0, 0, 0.4);
+    box-shadow: 0 0 25px rgba(139, 0, 0, 0.6);
+}
+
+.neon-nav ul {
+    display: flex;
+    list-style: none;
+    position: relative;
+    margin: 0;
+    padding: 0;
+}
+
+.neon-nav ul li {
+    position: relative;
+    z-index: 2;
+}
+
+.neon-nav ul li button {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 15px 30px;
+    transition: 0.3s ease;
+    font-family: inherit;
+}
+
+.neon-nav ul li.active button, 
+.neon-nav ul li button:hover {
+    color: var(--neon-red);
+    text-shadow: 0 0 15px var(--neon-red), 0 0 30px var(--dark-neon);
+}
+
+/* العنصر النشط الذي سيتم حقنه بواسطة سكريبت GSAP */
+.active-element {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: var(--active-element-show, 0);
+    z-index: 1;
+}
+
+.active-element svg.beam {
+    position: absolute;
+    bottom: -2px;
+    width: 100%;
+    height: 5px;
+}
+
+.active-element .strike {
+    position: absolute;
+    bottom: -15px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+/* =========================================
+   5. الحاوية الرئيسية والتخطيط العام
+   ========================================= */
+.main-glass-container {
+    width: 95%;
+    max-width: 1100px;
+    margin: 40px auto 80px auto;
+    border-radius: 30px;
+    padding: 40px;
+    position: relative;
+    z-index: 10;
+}
+
+section { animation: fadeIn 0.6s ease-in-out; }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* =========================================
+   6. قسم الرئيسية
+   ========================================= */
+.banner-wrapper { position: relative; text-align: center; }
+
+.full-banner {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 20px;
+}
+
+.profile-pic {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-top: -45px; /* رفع الصورة 25% من حجمها فوق البنر */
+    position: relative;
+    z-index: 2;
+    background: #000;
+}
+
+.text-content { text-align: center; margin-top: 25px; }
+
+.name-title {
+    font-size: 3.5rem;
+    color: var(--text-light);
+    text-shadow: 0 0 15px var(--neon-red);
+    margin-bottom: 25px;
+}
+
+/* صندوق النبذة البرمجية بخط أسود وإطار رصاصي متحرك */
+.bio-box {
+    background: rgba(255, 255, 255, 0.85); /* خلفية فاتحة ليبرز النص الأسود */
+    color: var(--text-dark);
+    font-weight: bold;
+    padding: 25px;
+    border-radius: 15px;
+    max-width: 850px;
+    margin: 0 auto 35px auto;
+    font-size: 1.3rem;
+    line-height: 1.9;
+    position: relative;
+    border: 3px solid transparent;
+}
+
+.moving-border {
+    background-clip: padding-box, border-box;
+    background-origin: padding-box, border-box;
+    background-image: linear-gradient(rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.85)), 
+                      linear-gradient(90deg, #555, #ccc, #555, #ccc);
+    background-size: 100% 100%, 200% 200%;
+    animation: borderMove 3s linear infinite;
+    box-shadow: 0 0 20px rgba(150, 150, 150, 0.5);
+}
+
+@keyframes borderMove {
+    0% { background-position: 0% 0%, 100% 0%; }
+    100% { background-position: 0% 0%, -100% 0%; }
+}
+
+.translate-btn-glow {
+    background: transparent;
+    color: var(--text-light);
+    border: 2px solid var(--neon-red);
+    padding: 12px 35px;
+    border-radius: 30px;
+    font-size: 1.2rem;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 0 15px var(--dark-neon);
+    transition: 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.translate-btn-glow:hover {
+    background: var(--neon-red);
+    box-shadow: 0 0 25px var(--neon-red), 0 0 50px var(--neon-red);
+    color: #fff;
+    transform: scale(1.05);
+}
+
+/* =========================================
+   7. قسم المشاريع
+   ========================================= */
+.projects-banner { height: 180px; margin-bottom: 40px; }
+
+.projects-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 40px;
+}
+
+@media (min-width: 850px) {
+    .projects-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.project-card {
+    padding: 30px;
+    border-radius: 20px;
+    text-align: center;
+    transition: 0.4s ease;
+}
+
+.project-card:hover { transform: translateY(-15px); }
+
+.project-title {
+    color: var(--neon-red);
+    text-shadow: 0 0 10px var(--neon-red);
+    margin-bottom: 20px;
+    font-size: 1.8rem;
+}
+
+.project-desc {
+    color: #eee;
+    margin-bottom: 30px;
+    line-height: 1.8;
+    font-size: 1.1rem;
+}
+
+.nav-style-btn {
+    display: inline-block;
+    text-decoration: none;
+    color: var(--text-light);
+    border: 2px solid var(--neon-red);
+    padding: 10px 25px;
+    border-radius: 25px;
+    box-shadow: 0 0 15px var(--dark-neon);
+    transition: 0.3s;
+    font-weight: bold;
+}
+
+.nav-style-btn:hover {
+    background: var(--neon-red);
+    color: #fff;
+    box-shadow: 0 0 25px var(--neon-red);
+}
+
+/* =========================================
+   8. قسم التواصل والأيقونات (الكود الأصلي الخاص بك)
+   ========================================= */
+.container-social {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.container-social ul {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 50px;
+    position: relative;
+}
+
+@media (min-width: 900px) {
+    .container-social ul {
+        grid-template-columns: repeat(6, 1fr);
+    }
+}
+
+.container-social ul li {
+    position: relative;
+    list-style: none;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: 0.5s;
+}
+
+.container-social ul li:before {
+    content: "";
+    position: absolute;
+    inset: 30px;
+    /* استخدام لون الخلفية والأحمر النيوني كما في كودك الأصلي تماماً */
+    box-shadow: 0 0 0 10px var(--clr), 0 0 0 20px var(--bg), 0 0 0 22px var(--clr);
+    transition: 0.5s;
+}
+
+.container-social ul li:hover:before {
+    inset: 0;
+}
+
+.container-social ul li:after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--bg);
+    transform: rotate(45deg);
+    z-index: -1;
+}
+
+.container-social ul li:hover {
+    z-index: 1000;
+    transform: scale(0.75);
+}
+
+.container-social ul li a {
+    position: relative;
+    text-decoration: none;
+    color: var(--clr);
+    font-size: 1.5em;
+    z-index: 10;
+    transition: 0.5s;
+}
+
+.container-social ul li a:hover {
+    font-size: 3em;
+    filter: drop-shadow(0 0 20px var(--clr)) drop-shadow(0 0 40px var(--clr))
+      drop-shadow(0 0 60px var(--clr));
+}
+
+/* حركة الخشب الطافي التي أضفناها كتحسين للملف السادس */
+.floating-wood {
+    animation: floatWood 4s ease-in-out infinite;
+}
+
+.floating-wood:nth-child(even) { animation-delay: 1.5s; }
+
+@keyframes floatWood {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-15px) rotate(4deg); }
+}
+
+/* =========================================
+   9. عداد الزوار
+   ========================================= */
+.visitor-counter {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    padding: 12px 25px;
+    border-radius: 30px;
+    color: var(--neon-red);
+    font-weight: bold;
+    font-size: 1.1rem;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}

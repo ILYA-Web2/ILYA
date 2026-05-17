@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ILYA | Portfolio</title>
+    
+    <meta property="og:title" content="ILYA | Portfolio">
+    <meta property="og:description" content="مبرمج يطور مواقع وتطبيقات وخدمات ذكاء اصطناعي">
+    <meta property="og:image" content="https://iili.io/qWN5VvR.md.jpg">
+    <link rel="icon" href="https://iili.io/qWN5VvR.md.jpg">
+
+    <link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@400;700&family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <svg style="display:none; position: absolute; width: 0; height: 0;">
+        <defs>
+            <filter id="liquid-glass-filter">
+                <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="3" result="noise" />
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
+            <filter id="electric-border-filter">
+                <feTurbulence type="fractalNoise" baseFrequency="0.01 0.04" numOctaves="2" result="warp">
+                    <animate attributeName="baseFrequency" values="0.01 0.04; 0.03 0.06; 0.01 0.04" dur="2s" repeatCount="indefinite"/>
+                </feTurbulence>
+                <feDisplacementMap in="SourceGraphic" in2="warp" scale="10" />
+            </filter>
+        </defs>
+    </svg>
+
+    <div id="preloader">
+        <div class="preloader-content">
+            <img src="https://iili.io/qWN5VvR.md.jpg" alt="Logo" class="preloader-logo electric-border">
+            <div class="preloader-bar">
+                <div class="preloader-strike"></div>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="galaxy-canvas"></canvas>
+
+    <nav class="neon-nav">
+        <ul>
+            <li class="active" data-target="home">
+                <button><span class="ar">الرئيسية</span><span class="en hidden">Home</span></button>
+            </li>
+            <li data-target="projects">
+                <button><span class="ar">المشاريع</span><span class="en hidden">Projects</span></button>
+            </li>
+            <li data-target="contact">
+                <button><span class="ar">تواصل</span><span class="en hidden">Contact</span></button>
+            </li>
+        </ul>
+        </nav>
+
+    <main class="main-glass-container electric-border">
+        
+        <section id="home" class="section active">
+            <div class="banner-wrapper">
+                <img src="https://iili.io/fb6SvS9.md.jpg" alt="Banner" class="full-banner">
+                <img src="https://iili.io/fb64ziv.md.jpg" alt="Profile" class="profile-pic electric-border">
+            </div>
+
+            <div class="text-content">
+                <h1 class="name-title"><span class="ar">إيليا</span><span class="en hidden">ILYA</span></h1>
+                
+                <div class="bio-box liquid-glass moving-border">
+                    <p class="ar">مبرمج يطور مواقع وتطبيقات بلغات مختلفة وبوتات تليجرام لخدمات الذكاء الاصطناعي وخدمات عادية.</p>
+                    <p class="en hidden">Developer building websites, applications in various languages, and Telegram bots for AI and regular services.</p>
+                </div>
+
+                <button id="translate-btn" class="translate-btn-glow">
+                    <i class="fa-solid fa-language"></i> <span class="btn-text">ترجم للإنجليزية</span>
+                </button>
+            </div>
+        </section>
+
+        <section id="projects" class="section hidden">
+            <img src="https://iili.io/fb6SvS9.md.jpg" alt="Projects Banner" class="full-banner projects-banner electric-border">
+            
+            <div class="projects-grid">
+                
+                <div class="project-card liquid-glass electric-border">
+                    <h2 class="project-title">بوت خدمات ذكاء اصطناعي</h2>
+                    <p class="project-desc">بوت متطور مبني لتقديم خدمات الذكاء الاصطناعي عبر منصة تليجرام بسرعة ودقة عالية.</p>
+                    <a href="https://t.me/swc_t" target="_blank" class="project-link nav-style-btn">رابط المشروع</a>
+                </div>
+                <div class="project-card liquid-glass electric-border">
+                    <h2 class="project-title">موقع خدمات ذكاء اصطناعي</h2>
+                    <p class="project-desc">منصة ويب تقدم أدوات ذكاء اصطناعي لتوليد النصوص والصور، مبنية بأحدث تقنيات الويب.</p>
+                    <a href="https://t.me/swc_t" target="_blank" class="project-link nav-style-btn">رابط المشروع</a>
+                </div>
+                </div>
+        </section>
+
+        <section id="contact" class="section hidden">
+            <div class="contact-desc liquid-grey-glass">
+                <p class="en">Connect with me across various platforms. I am always open to discussing new projects and creative ideas.</p>
+            </div>
+
+            <div class="container-social">
+                <ul>
+                    <li style="--clr: #ff0000" class="floating-wood">
+                        <a href="https://t.me/swc_t" class="delayed-link">
+                            <i class="fa-brands fa-telegram"></i>
+                        </a>
+                    </li>
+                    <li style="--clr: #ff0000" class="floating-wood">
+                        <a href="https://t.me/ILYA3bot" class="delayed-link">
+                            <i class="fa-solid fa-robot"></i>
+                        </a>
+                    </li>
+                    <li style="--clr: #ff0000" class="floating-wood">
+                        <a href="https://instagram.com/szc2v" class="delayed-link">
+                            <i class="fa-brands fa-instagram"></i>
+                        </a>
+                    </li>
+                    <li style="--clr: #ff0000" class="floating-wood">
+                        <a href="https://youtube.com/@scv_t" class="delayed-link">
+                            <i class="fa-brands fa-youtube"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+    </main>
+
+    <div class="visitor-counter liquid-glass">
+        <i class="fa-solid fa-chart-line"></i> عدد الزوار: <span id="view-count">0</span>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
