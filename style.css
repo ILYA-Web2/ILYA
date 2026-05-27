@@ -1,0 +1,532 @@
+@charset "UTF-8";
+
+/* =========================================================================
+   ❖ 1. الإعدادات الجذرية والمتغيرات (Root & Variables)
+   ========================================================================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+:root {
+    /* الألوان النيونية والزجاجية */
+    --neon-primary: #ff0000;
+    --neon-glow: #ff3131;
+    --neon-dark: #8b0000;
+    
+    /* ألوان الخلفيات المطابقة لملفاتك الأصلية */
+    --bg-color: #050505; 
+    --glass-panel-bg: rgba(15, 0, 0, 0.45);
+    --glass-grey-bg: rgba(30, 30, 30, 0.6);
+    --nav-bg: rgba(10, 0, 0, 0.75);
+    
+    /* ألوان النصوص */
+    --text-light: #ffffff;
+    --text-dark: #000000;
+    
+    /* قياسات رياضية للأنيميشن */
+    --transition-smooth: 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-light);
+    font-family: 'Reem Kufi', sans-serif;
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* =========================================================================
+   ❖ 2. أنظمة الخطوط والترجمة (Typography & Localization)
+   ========================================================================= */
+.text-ar { font-family: 'Reem Kufi', sans-serif; font-weight: 500; }
+.text-en { font-family: 'Cinzel', serif; font-weight: 700; }
+
+/* كلاس الإخفاء الجذري لعملية الترجمة */
+.hidden { display: none !important; }
+
+/* =========================================================================
+   ❖ 3. الطبقات الخلفية وشاشة التحميل (Canvas & Preloader)
+   ========================================================================= */
+.webgl {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -10; /* أعمق طبقة في الموقع */
+    outline: none;
+    pointer-events: auto; /* السماح للمجرة بالتفاعل مع الماوس */
+}
+
+#preloader-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: var(--bg-color);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; /* أعلى طبقة */
+    transition: opacity 0.6s ease-in-out;
+}
+
+.preloader-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+}
+
+.preloader-img {
+    width: 160px;
+    height: 160px;
+    border-radius: 25px;
+    object-fit: cover;
+}
+
+.preloader-track {
+    width: 280px;
+    height: 4px;
+    background: rgba(255, 0, 0, 0.15);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+}
+
+.preloader-strike-bar {
+    width: 0%;
+    height: 100%;
+    background: var(--neon-primary);
+    box-shadow: 0 0 25px var(--neon-glow);
+    animation: masterLoading 2s cubic-bezier(0.77, 0, 0.175, 1) forwards;
+}
+
+@keyframes masterLoading {
+    0% { width: 0; }
+    40% { width: 60%; }
+    100% { width: 100%; }
+}
+
+/* =========================================================================
+   ❖ 4. فلاتر الإطارات المستمرة والزجاج السائل (The Core Aesthetics)
+   ========================================================================= */
+/* الإطار الكهربائي المستمر (كما طلبت نسبة 80% شفافة) */
+.electric-border-frame {
+    border: 2px solid rgba(255, 0, 0, 0.8);
+    box-shadow: 0 0 18px rgba(255, 0, 0, 0.5), inset 0 0 18px rgba(255, 0, 0, 0.5);
+    /* ربط الكلاس بفلتر الـ SVG الموجود في الـ HTML للحركة العشوائية الدائمة */
+    filter: url('#continuous-electric-border');
+    transform: translateZ(0); /* تسريع الهاردوير لتجنب التقطيع */
+}
+
+/* لوح الزجاج السائل مع الفلتر المدمج */
+.liquid-glass-panel {
+    background: var(--glass-panel-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 0, 0, 0.25);
+    box-shadow: 0 12px 40px 0 rgba(139, 0, 0, 0.4);
+    /* إضافة فلتر التشويه الزجاجي ليعطي إيحاء السائل */
+    filter: url('#liquid-glass-filter');
+}
+
+/* =========================================================================
+   ❖ 5. شريط التنقل المعقد (GSAP Navbar Base) - تم تجهيزه للسكريبت
+   ========================================================================= */
+.main-header {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding-top: 30px;
+    position: relative;
+    z-index: 100;
+}
+
+#master-nav {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: var(--nav-bg);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border-radius: 50px;
+    padding: 8px 25px;
+    border: 1px solid rgba(255, 0, 0, 0.3);
+    box-shadow: 0 0 30px rgba(139, 0, 0, 0.5);
+}
+
+#master-nav ul {
+    display: flex;
+    list-style: none;
+    position: relative;
+    gap: 15px;
+}
+
+#master-nav ul li {
+    position: relative;
+    z-index: 2;
+}
+
+#master-nav ul li button {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.3rem;
+    padding: 15px 35px;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    outline: none;
+}
+
+#master-nav ul li.active button, 
+#master-nav ul li button:hover {
+    color: var(--neon-primary);
+    text-shadow: 0 0 15px var(--neon-primary), 0 0 30px var(--neon-dark);
+}
+
+/* حاوية شعاع الطاقة (التي يتدخل فيها GSAP) */
+.active-element {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: var(--active-element-show, 0);
+    z-index: 1;
+}
+
+.active-element svg.beam {
+    position: absolute;
+    bottom: -2px;
+    width: 100%;
+    height: 5px;
+}
+
+.active-element .strike {
+    position: absolute;
+    bottom: -15px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+/* =========================================================================
+   ❖ 6. الحاوية الأم وحركة التنقل (Master Container & Routing)
+   ========================================================================= */
+.master-container {
+    width: 92%;
+    max-width: 1200px; /* مقاس ضخم يتناسب مع الكمبيوتر */
+    margin: 40px auto 100px auto;
+    border-radius: 35px;
+    padding: 50px;
+    position: relative;
+    z-index: 50;
+}
+
+.tab-content {
+    animation: tabFadeIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes tabFadeIn {
+    0% { opacity: 0; transform: translateY(40px) scale(0.98); filter: blur(5px); }
+    100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+/* =========================================================================
+   ❖ 7. قسم الرئيسية (Home Section)
+   ========================================================================= */
+.banner-container {
+    position: relative;
+    width: 100%;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.banner-img {
+    width: 100%;
+    height: 350px;
+    object-fit: cover;
+    border-radius: 25px;
+}
+
+/* تم رفع الصورة 25% من حجمها فوق البنر */
+.profile-avatar {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-top: -50px; 
+    position: relative;
+    z-index: 5;
+    background-color: var(--bg-color);
+}
+
+.info-container {
+    text-align: center;
+}
+
+.ilya-name {
+    font-size: 4.5rem;
+    color: var(--text-light);
+    text-shadow: 0 0 20px var(--neon-primary), 0 0 40px var(--neon-dark);
+    margin-bottom: 30px;
+    letter-spacing: 2px;
+}
+
+/* نص تعريفي أسود مع إطار رصاصي متحرك دائم */
+.bio-wrapper {
+    background-color: #f2f2f2;
+    color: var(--text-dark);
+    padding: 35px 40px;
+    border-radius: 20px;
+    max-width: 900px;
+    margin: 0 auto 40px auto;
+    font-size: 1.4rem;
+    line-height: 2;
+    font-weight: 700;
+    position: relative;
+    
+    /* هندسة الإطار المتحرك الرصاصي */
+    border: 4px solid transparent;
+    background-clip: padding-box, border-box;
+    background-origin: padding-box, border-box;
+    background-image: linear-gradient(#f2f2f2, #f2f2f2), 
+                      linear-gradient(90deg, #444, #d1d1d1, #444, #d1d1d1);
+    background-size: 100% 100%, 200% 200%;
+    animation: borderMoveGrey 3s linear infinite;
+    box-shadow: 0 0 25px rgba(150, 150, 150, 0.6);
+}
+
+@keyframes borderMoveGrey {
+    0% { background-position: 0% 0%, 100% 0%; }
+    100% { background-position: 0% 0%, -100% 0%; }
+}
+
+/* زر الترجمة بأيقونة دقيقة */
+.glow-translation-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: transparent;
+    color: var(--text-light);
+    border: 2px solid var(--neon-primary);
+    padding: 14px 40px;
+    border-radius: 40px;
+    font-size: 1.3rem;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 0 20px var(--neon-dark);
+    transition: var(--transition-smooth);
+}
+
+.glow-translation-btn:hover {
+    background: var(--neon-primary);
+    box-shadow: 0 0 35px var(--neon-primary), 0 0 60px var(--neon-glow);
+    transform: scale(1.06);
+    color: #fff;
+}
+
+/* =========================================================================
+   ❖ 8. قسم المشاريع القابل للنسخ اللانهائي (Projects Section)
+   ========================================================================= */
+.projects-banner {
+    height: 220px;
+    margin-bottom: 50px;
+}
+
+.projects-grid {
+    display: grid;
+    grid-template-columns: 1fr; /* جوال: عمود واحد */
+    gap: 50px;
+}
+
+/* لابتوب: عمودين */
+@media (min-width: 950px) {
+    .projects-grid { grid-template-columns: 1fr 1fr; }
+}
+
+.code-style-card {
+    padding: 45px 35px;
+    border-radius: 25px;
+    text-align: center;
+    transition: transform var(--transition-smooth);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.code-style-card:hover {
+    transform: translateY(-20px) scale(1.02);
+}
+
+.project-title {
+    color: var(--neon-primary);
+    text-shadow: 0 0 15px var(--neon-primary);
+    font-size: 2.2rem;
+    margin-bottom: 25px;
+}
+
+.project-desc {
+    color: #e0e0e0;
+    font-size: 1.25rem;
+    line-height: 1.9;
+    margin-bottom: 40px;
+    flex-grow: 1;
+}
+
+.neon-link-btn {
+    display: inline-block;
+    text-decoration: none;
+    color: var(--text-light);
+    border: 2px solid var(--neon-primary);
+    padding: 12px 35px;
+    border-radius: 30px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    box-shadow: 0 0 15px var(--neon-dark);
+    transition: var(--transition-smooth);
+}
+
+.neon-link-btn:hover {
+    background: var(--neon-primary);
+    box-shadow: 0 0 30px var(--neon-primary);
+    color: #fff;
+}
+
+/* =========================================================================
+   ❖ 9. قسم التواصل والأيقونات (Contact Section) - الكود الأصلي بحذافيره
+   ========================================================================= */
+.liquid-grey-glass {
+    background: var(--glass-grey-bg);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+    padding: 35px;
+    border-radius: 20px;
+    text-align: center;
+    margin-bottom: 60px;
+    font-size: 1.35rem;
+    line-height: 1.9;
+}
+
+/* ---- الكود الأصلي الخاص بك للأيقونات بالضبط، مضافاً له شبكة الـ Grid ---- */
+.container-social-original {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: 25vh;
+}
+
+.container-social-original ul {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* جوال: 3 أيقونات بالصف */
+    gap: 60px;
+    position: relative;
+    list-style: none;
+}
+
+/* لابتوب: 6 أيقونات بالصف (استباقاً لزيادة الروابط مستقبلاً) */
+@media (min-width: 950px) {
+    .container-social-original ul {
+        grid-template-columns: repeat(6, 1fr);
+        gap: 80px;
+    }
+}
+
+.container-social-original ul li {
+    position: relative;
+    list-style: none;
+    width: 90px;  /* تكبير طفيف ليناسب الشاشات الكبيرة */
+    height: 90px; /* تكبير طفيف ليناسب الشاشات الكبيرة */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: 0.5s;
+}
+
+/* الحسابات الرياضية الأصلية الخاصة بك للإطار المائل */
+.container-social-original ul li:before {
+    content: "";
+    position: absolute;
+    inset: 35px; /* معدلة لتناسب الحجم الجديد 90px */
+    box-shadow: 0 0 0 10px var(--clr), 0 0 0 20px var(--bg-color), 0 0 0 22px var(--clr);
+    transition: 0.5s;
+}
+
+.container-social-original ul li:hover:before {
+    inset: 0;
+}
+
+.container-social-original ul li:after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--bg-color);
+    transform: rotate(45deg);
+    z-index: -1;
+}
+
+.container-social-original ul li:hover {
+    z-index: 1000;
+    transform: scale(0.75);
+}
+
+.container-social-original ul li a {
+    position: relative;
+    text-decoration: none;
+    color: var(--clr);
+    font-size: 1.8em;
+    z-index: 10;
+    transition: 0.5s;
+}
+
+.container-social-original ul li a:hover {
+    font-size: 3.5em;
+    filter: drop-shadow(0 0 20px var(--clr)) drop-shadow(0 0 40px var(--clr)) drop-shadow(0 0 60px var(--clr));
+}
+
+/* حركة الخشب الطافي (المضافة كتحسين) */
+.floating-wood {
+    animation: floatingAnimation 4.5s ease-in-out infinite;
+}
+
+.floating-wood:nth-child(2n) { animation-delay: 1.2s; }
+.floating-wood:nth-child(3n) { animation-delay: 2.4s; }
+
+@keyframes floatingAnimation {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-18px) rotate(5deg); }
+}
+
+/* =========================================================================
+   ❖ 10. عداد الزوار الدقيق (Live Visitor Counter)
+   ========================================================================= */
+.visitor-counter-widget {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    padding: 15px 30px;
+    border-radius: 50px;
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: var(--neon-primary);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    z-index: 999;
+    /* يستخدم نفس تصميم الحاوية الأم (الزجاج السائل المدمج) */
+}
