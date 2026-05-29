@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ILYA | المحرك البصري الفائق</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="cyber-loader">
+        <div class="loader-core"></div>
+        <div class="loader-text">يتم تهيئة محرك WebGL...</div>
+    </div>
+
+    <canvas id="webgl-canvas"></canvas>
+
+    <div id="ui-layer">
+        
+        <header class="holographic-header">
+            <nav class="cyber-nav">
+                <ul id="nav-list">
+                    <li class="active" data-target="home"><span>الرئيسية</span></li>
+                    <li data-target="projects"><span>المشاريع</span></li>
+                    <li data-target="contact"><span>التواصل</span></li>
+                </ul>
+                <div class="nav-indicator"></div>
+            </nav>
+        </header>
+
+        <main class="master-glass-panel">
+            
+            <section id="home" class="section active">
+                <div class="hero-visuals">
+                    <div class="banner-wrapper">
+                        <img src="https://iili.io/fb6SvS9.md.jpg" alt="Cosmic Banner" class="banner-img">
+                    </div>
+                    <div class="profile-wrapper">
+                        <img src="https://iili.io/fb64ziv.md.jpg" alt="ILYA Profile" class="profile-img">
+                        <div class="pulse-ring"></div>
+                    </div>
+                </div>
+
+                <div class="content-body">
+                    <h1 class="glitch-title" data-text="إيليا">إيليا</h1>
+                    <div class="premium-bio">
+                        <p>مهندس برمجيات وعقل معماري للأنظمة الرقمية. أبني عوالم WebGL التفاعلية، منصات الذكاء الاصطناعي، وبوتات تليجرام المتقدمة.</p>
+                        <p>دمج تام بين المنطق الرياضي الصارم والجمال البصري الذي يسبق الزمن.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="projects" class="section hidden">
+                <div class="projects-grid">
+                    
+                    <article class="cyber-card">
+                        <div class="card-glow-effect"></div>
+                        <i class="fa-solid fa-microchip card-icon"></i>
+                        <h3>بوت الذكاء الاصطناعي</h3>
+                        <p>محرك عصبي مصغر يعمل عبر تليجرام، يقدم خدمات ذكاء اصطناعي لحظية بمعمارية فائقة الدقة والسرعة.</p>
+                        <a href="https://t.me/swc_t" target="_blank" class="cyber-btn delayed-link">الولوج للنظام</a>
+                    </article>
+                    
+                    <article class="cyber-card">
+                        <div class="card-glow-effect"></div>
+                        <i class="fa-solid fa-network-wired card-icon"></i>
+                        <h3>منصة الخدمات المعقدة</h3>
+                        <p>واجهة ويب متكاملة لمعالجة البيانات وتوليد النصوص والصور، مبنية بأحدث أطر العمل العالمية.</p>
+                        <a href="https://t.me/swc_t" target="_blank" class="cyber-btn delayed-link">الولوج للنظام</a>
+                    </article>
+
+                </div>
+            </section>
+
+            <section id="contact" class="section hidden">
+                <div class="contact-header">
+                    <h2>شبكة الاتصال المشفرة</h2>
+                    <p>بوابات التواصل المباشر. اختر القناة لبدء المزامنة والاتصال.</p>
+                </div>
+                <div class="nexus-grid">
+                    <a href="https://t.me/swc_t" class="nexus-node delayed-link" data-color="#ff003c">
+                        <i class="fa-brands fa-telegram"></i>
+                    </a>
+                    <a href="https://t.me/ILYA3bot" class="nexus-node delayed-link" data-color="#8a2be2">
+                        <i class="fa-solid fa-robot"></i>
+                    </a>
+                    <a href="https://instagram.com/szc2v" class="nexus-node delayed-link" data-color="#ff003c">
+                        <i class="fa-brands fa-instagram"></i>
+                    </a>
+                    <a href="https://youtube.com/@scv_t" class="nexus-node delayed-link" data-color="#8a2be2">
+                        <i class="fa-brands fa-youtube"></i>
+                    </a>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <div class="hud-counter">
+        <div class="hud-icon"><i class="fa-solid fa-satellite-dish"></i></div>
+        <div class="hud-text">
+            <span class="hud-label">النبضات المتزامنة</span>
+            <span id="live-counter">...</span>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+    
+    <script src="script.js"></script>
+</body>
+</html>
