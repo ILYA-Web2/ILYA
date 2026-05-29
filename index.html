@@ -2,102 +2,124 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>ILYA | Cosmic Nexus — Ultra Premium Portfolio</title>
-    <!-- Font Awesome 6 (CDN) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css">
-    <!-- Google Fonts: clean & modern (no distortion) -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ILYA | المحرك البصري الفائق</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&family=Reem+Kufi:wght@400;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- CANVAS: PERFORMANCE ISOLATED BACKGROUND GALAXY (pointer-events: none) -->
-    <canvas class="webgl-galaxy"></canvas>
-
-    <!-- HEADER WITH SMART NAVIGATION (GLOWING BEAM) -->
-    <header class="main-header">
-        <nav id="master-nav">
-            <ul class="nav-list">
-                <li class="active" data-target="home">
-                    <button class="nav-btn">الرئيسية</button>
-                </li>
-                <li data-target="projects">
-                    <button class="nav-btn">المشاريع</button>
-                </li>
-                <li data-target="contact">
-                    <button class="nav-btn">التواصل</button>
-                </li>
-            </ul>
-            <!-- DYNAMIC GLOWING ENERGY BEAM (active indicator) -->
-            <div class="nav-active-beam"></div>
-        </nav>
-    </header>
-
-    <!-- MAIN GLASS CONTAINER (all interactive tabs) -->
-    <main class="master-container glass-panel">
-        <!-- HOME SECTION -->
-        <section id="home" class="tab-content">
-            <div class="profile-section">
-                <h1 class="ilya-name">ILYA</h1>
-                <div class="bio-box">
-                    <p class="text-ar">مرحباً بك في عالمي الرقمي. أقوم ببناء وتطوير واجهات الويب المستقبلية بأعلى معايير الأداء والجمال البصري المستقر.</p>
-                    <p class="text-en hidden">Welcome to my digital universe. I craft futuristic web interfaces with ultra-stable performance and next‑gen visual elegance.</p>
-                </div>
-                <button id="translate-btn" class="neon-btn">
-                    <i class="fa-solid fa-language"></i> <span class="btn-lang-text">ترجم للإنجليزية</span>
-                </button>
-            </div>
-        </section>
-
-        <!-- PROJECTS SECTION (grid, premium cards) -->
-        <section id="projects" class="tab-content hidden">
-            <div class="projects-grid">
-                <div class="project-card">
-                    <div class="card-glow"></div>
-                    <h3>⚡ محرك المجرة ثلاثي الأبعاد</h3>
-                    <p>نظام جزيئات فضائية تفاعلي عالي الأداء باستخدام Three.js مع تحسينات 60FPS وتأثيرات طيفية.</p>
-                    <a href="#" class="project-link delayed-link" data-url="https://github.com/ilya/galaxy-engine">عرض المشروع →</a>
-                </div>
-                <div class="project-card">
-                    <div class="card-glow"></div>
-                    <h3>🌀 أنظمة تحريك GSAP ذكية</h3>
-                    <p>شريط طاقة متكيف ديناميكياً مع حدود سلسة وتأثيرات احترافية ومزامنة مع أبعاد الواجهة.</p>
-                    <a href="#" class="project-link delayed-link" data-url="https://github.com/ilya/gsap-power-slider">عرض المشروع →</a>
-                </div>
-                <div class="project-card">
-                    <div class="card-glow"></div>
-                    <h3>✨ واجهة الجيل القادم</h3>
-                    <p>تصميم زجاجي (Glassmorphism) مع تكامل بين ثري دي و responsiveness فائق على جميع الأجهزة.</p>
-                    <a href="#" class="project-link delayed-link" data-url="https://github.com/ilya/nexus-ui">عرض المشروع →</a>
-                </div>
-            </div>
-        </section>
-
-        <!-- CONTACT SECTION (social icons, clean hover) -->
-        <section id="contact" class="tab-content hidden">
-            <div class="social-wrapper">
-                <h3 class="contact-glow-text">تواصل معي عبر المنصات</h3>
-                <ul class="social-icons-list">
-                    <li style="--clr: #1877f2;"><a href="https://facebook.com/ilya.portfolio" target="_blank" rel="noopener"><i class="fa-brands fa-facebook-f"></i></a></li>
-                    <li style="--clr: #ff0000;"><a href="https://youtube.com/@ilya" target="_blank" rel="noopener"><i class="fa-brands fa-youtube"></i></a></li>
-                    <li style="--clr: #1da1f2;"><a href="https://twitter.com/ilya_design" target="_blank" rel="noopener"><i class="fa-brands fa-twitter"></i></a></li>
-                    <li style="--clr: #e1306c;"><a href="https://instagram.com/ilya.vision" target="_blank" rel="noopener"><i class="fa-brands fa-instagram"></i></a></li>
-                    <li style="--clr: #0a66c7;"><a href="https://linkedin.com/in/ilya" target="_blank" rel="noopener"><i class="fa-brands fa-linkedin-in"></i></a></li>
-                </ul>
-            </div>
-        </section>
-    </main>
-
-    <!-- VISITOR COUNTER (stable, simulated) -->
-    <div class="visitor-counter">
-        <i class="fa-solid fa-eye"></i> <span>الزوار المباشر:</span> <span id="live-view-count">0</span>
+    <div id="cyber-loader">
+        <div class="loader-core"></div>
+        <div class="loader-text">يتم تهيئة محرك WebGL...</div>
     </div>
 
-    <!-- CDNS: GSAP, Three.js core (r128) -->
-    <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
+    <canvas id="webgl-canvas"></canvas>
+
+    <div id="ui-layer">
+        
+        <header class="holographic-header">
+            <nav class="cyber-nav">
+                <ul id="nav-list">
+                    <li class="active" data-target="home"><span>الرئيسية</span></li>
+                    <li data-target="projects"><span>المشاريع</span></li>
+                    <li data-target="contact"><span>التواصل</span></li>
+                </ul>
+                <div class="nav-indicator"></div>
+            </nav>
+        </header>
+
+        <main class="master-glass-panel">
+            
+            <section id="home" class="section active">
+                <div class="hero-visuals">
+                    <div class="banner-wrapper">
+                        <img src="https://iili.io/fb6SvS9.md.jpg" alt="Cosmic Banner" class="banner-img">
+                    </div>
+                    <div class="profile-wrapper">
+                        <img src="https://iili.io/fb64ziv.md.jpg" alt="ILYA Profile" class="profile-img">
+                        <div class="pulse-ring"></div>
+                    </div>
+                </div>
+
+                <div class="content-body">
+                    <h1 class="glitch-title" data-text="إيليا">إيليا</h1>
+                    <div class="premium-bio">
+                        <p>مهندس برمجيات وعقل معماري للأنظمة الرقمية. أبني عوالم WebGL التفاعلية، منصات الذكاء الاصطناعي، وبوتات تليجرام المتقدمة.</p>
+                        <p>دمج تام بين المنطق الرياضي الصارم والجمال البصري الذي يسبق الزمن.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="projects" class="section hidden">
+                <div class="projects-grid">
+                    
+                    <article class="cyber-card">
+                        <div class="card-glow-effect"></div>
+                        <i class="fa-solid fa-microchip card-icon"></i>
+                        <h3>بوت الذكاء الاصطناعي</h3>
+                        <p>محرك عصبي مصغر يعمل عبر تليجرام، يقدم خدمات ذكاء اصطناعي لحظية بمعمارية فائقة الدقة والسرعة.</p>
+                        <a href="https://t.me/swc_t" target="_blank" class="cyber-btn delayed-link">الولوج للنظام</a>
+                    </article>
+                    
+                    <article class="cyber-card">
+                        <div class="card-glow-effect"></div>
+                        <i class="fa-solid fa-network-wired card-icon"></i>
+                        <h3>منصة الخدمات المعقدة</h3>
+                        <p>واجهة ويب متكاملة لمعالجة البيانات وتوليد النصوص والصور، مبنية بأحدث أطر العمل العالمية.</p>
+                        <a href="https://t.me/swc_t" target="_blank" class="cyber-btn delayed-link">الولوج للنظام</a>
+                    </article>
+
+                </div>
+            </section>
+
+            <section id="contact" class="section hidden">
+                <div class="contact-header">
+                    <h2>شبكة الاتصال المشفرة</h2>
+                    <p>بوابات التواصل المباشر. اختر القناة لبدء المزامنة والاتصال.</p>
+                </div>
+                <div class="nexus-grid">
+                    <a href="https://t.me/swc_t" class="nexus-node delayed-link" data-color="#ff003c">
+                        <i class="fa-brands fa-telegram"></i>
+                    </a>
+                    <a href="https://t.me/ILYA3bot" class="nexus-node delayed-link" data-color="#8a2be2">
+                        <i class="fa-solid fa-robot"></i>
+                    </a>
+                    <a href="https://instagram.com/szc2v" class="nexus-node delayed-link" data-color="#ff003c">
+                        <i class="fa-brands fa-instagram"></i>
+                    </a>
+                    <a href="https://youtube.com/@scv_t" class="nexus-node delayed-link" data-color="#8a2be2">
+                        <i class="fa-brands fa-youtube"></i>
+                    </a>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <div class="hud-counter">
+        <div class="hud-icon"><i class="fa-solid fa-satellite-dish"></i></div>
+        <div class="hud-text">
+            <span class="hud-label">النبضات المتزامنة</span>
+            <span id="live-counter">...</span>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <!-- Custom script: galaxy + all premium features -->
+    
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+    
     <script src="script.js"></script>
 </body>
 </html>
