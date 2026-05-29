@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ILYA | العرض الاحترافي</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.2/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <canvas class="webgl"></canvas>
+
+    <header class="main-header">
+        <nav id="master-nav">
+            <ul>
+                <li class="active" data-target="home"><button>الرئيسية</button></li>
+                <li data-target="projects"><button>المشاريع</button></li>
+                <li data-target="contact"><button>التواصل</button></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="master-container glass-panel">
+        
+        <section id="home" class="tab-content">
+            <div class="profile-section">
+                <h1 class="ilya-name">ILYA</h1>
+                <div class="bio-box">
+                    <p class="text-ar">مرحباً بك في عالمي الرقمي. أقوم ببناء وتطوير واجهات الويب المستقبلية بأعلى معايير الأداء والجمال البصري المستقر.</p>
+                    <p class="text-en hidden">Welcome to my digital world. I craft futuristic web interfaces with the highest standards of stable visual performance.</p>
+                </div>
+                <button id="translate-btn" class="neon-btn">
+                    <i class="fa-solid fa-language"></i> <span class="btn-lang-text">ترجم للإنجليزية</span>
+                </button>
+            </div>
+        </section>
+
+        <section id="projects" class="tab-content hidden">
+            <div class="projects-grid">
+                <div class="project-card">
+                    <h3>محرك المجرة ثلاثي الأبعاد</h3>
+                    <p>تطوير نظام جزيئات فضائية تفاعلي معقد باستخدام Three.js عالي الأداء.</p>
+                    <a href="#" class="project-link delayed-link" data-url="https://github.">عرض المشروع</a>
+                </div>
+                <div class="project-card">
+                    <h3>أنظمة تحريك GSAP</h3>
+                    <p>بناء شريط طاقة ذكي يتكيف مع أبعاد عناصر التحكم ديناميكياً.</p>
+                    <a href="#" class="project-link delayed-link" data-url="https://github.">عرض المشروع</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="tab-content hidden">
+            <div class="social-wrapper">
+                <h3>تواصل معي مباشرة</h3>
+                <ul class="social-icons-list">
+                    <li style="--clr: #1877f2;"><a href="https://facebook.com" target="_blank"><i class="fa-brands fa-facebook-f"></i></a></li>
+                    <li style="--clr: #ff0000;"><a href="https://youtube.com" target="_blank"><i class="fa-brands fa-youtube"></i></a></li>
+                    <li style="--clr: #1da1f2;"><a href="https://twitter.com" target="_blank"><i class="fa-brands fa-twitter"></i></a></li>
+                    <li style="--clr: #e1306c;"><a href="https://instagram.com" target="_blank"><i class="fa-brands fa-instagram"></i></a></li>
+                </ul>
+            </div>
+        </section>
+
+    </main>
+
+    <div class="visitor-counter">
+        <i class="fa-solid fa-eye"></i> العداد الزمني: <span id="live-view-count">0</span>
+    </div>
+
+    <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
