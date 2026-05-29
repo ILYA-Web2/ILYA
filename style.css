@@ -1,0 +1,396 @@
+/* =========================================================================
+   style.css — ULTRA PREMIUM COSMIC GLASS / NO DISTORTION / STABLE 60FPS
+   ========================================================================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #050508;
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: #ffffff;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* =========================================================================
+   ❖ 3D BACKGROUND CANVAS — COMPLETE ISOLATION (pointer-events: none)
+   ========================================================================= */
+.webgl-galaxy {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -2;
+    pointer-events: none;
+    display: block;
+    outline: none;
+}
+
+/* =========================================================================
+   ❖ UTILITY CLASSES (clean toggles)
+   ========================================================================= */
+.hidden {
+    display: none !important;
+}
+
+/* =========================================================================
+   ❖ HEADER & NAVIGATION — ENERGY BEAM (dynamic positioning)
+   ========================================================================= */
+.main-header {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem 1rem 1rem 1rem;
+    position: relative;
+    z-index: 200;
+}
+
+#master-nav {
+    position: relative;
+    background: rgba(8, 8, 15, 0.65);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    border: 1px solid rgba(255, 40, 40, 0.35);
+    border-radius: 80px;
+    padding: 0.4rem 0.8rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 60, 60, 0.1);
+}
+
+.nav-list {
+    display: flex;
+    list-style: none;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-btn {
+    background: transparent;
+    border: none;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    padding: 0.8rem 2rem;
+    color: rgba(255, 255, 255, 0.75);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    letter-spacing: 0.5px;
+    border-radius: 60px;
+}
+
+.nav-list li.active .nav-btn,
+.nav-btn:hover {
+    color: #ff4d4d;
+    text-shadow: 0 0 8px rgba(255, 77, 77, 0.6);
+}
+
+/* Glowing energy beam (active indicator) — positioned dynamically via JS */
+.nav-active-beam {
+    position: absolute;
+    bottom: 4px;
+    height: 3px;
+    background: linear-gradient(90deg, #ff3366, #ff0040, #ff3366);
+    border-radius: 4px;
+    filter: blur(1px);
+    box-shadow: 0 0 12px #ff3366, 0 0 20px #ff0040;
+    transition: width 0.28s cubic-bezier(0.2, 0.9, 0.4, 1.1), transform 0.28s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* =========================================================================
+   ❖ MAIN GLASS CONTAINER (stable, modern)
+   ========================================================================= */
+.master-container {
+    width: 90%;
+    max-width: 1100px;
+    margin: 1.8rem auto 5rem auto;
+    position: relative;
+    z-index: 50;
+}
+
+.glass-panel {
+    background: rgba(12, 10, 22, 0.55);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-radius: 2rem;
+    border: 1px solid rgba(255, 60, 60, 0.25);
+    padding: 2.5rem;
+    box-shadow: 0 25px 45px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    transition: border-color 0.2s;
+}
+
+/* =========================================================================
+   ❖ HOME SECTION — typography + translation
+   ========================================================================= */
+.profile-section {
+    text-align: center;
+}
+
+.ilya-name {
+    font-size: 4.2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #ffffff, #ff6a6a);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 20px rgba(255, 50, 50, 0.4);
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+}
+
+.bio-box {
+    background: rgba(0, 0, 0, 0.35);
+    border-right: 4px solid #ff3366;
+    padding: 1.8rem;
+    border-radius: 1.2rem;
+    font-size: 1.2rem;
+    line-height: 1.7;
+    max-width: 800px;
+    margin: 1.5rem auto 2rem auto;
+    text-align: right;
+    font-weight: 400;
+    color: #f0f0f0;
+}
+
+.text-en {
+    direction: ltr;
+    text-align: left;
+}
+
+.neon-btn {
+    background: rgba(0, 0, 0, 0.45);
+    border: 1.5px solid #ff3366;
+    color: white;
+    padding: 0.8rem 2rem;
+    border-radius: 40px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    backdrop-filter: blur(4px);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+}
+
+.neon-btn:hover {
+    background: #ff3366;
+    box-shadow: 0 0 20px #ff3366;
+    transform: scale(1.02);
+    border-color: #ff3366;
+}
+
+/* =========================================================================
+   ❖ PROJECTS — responsive grid + premium cards
+   ========================================================================= */
+.projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+}
+
+.project-card {
+    background: rgba(18, 18, 28, 0.65);
+    border: 1px solid rgba(255, 70, 70, 0.2);
+    border-radius: 1.5rem;
+    padding: 1.8rem;
+    transition: transform 0.3s ease, border-color 0.25s;
+    position: relative;
+    overflow: hidden;
+}
+
+.project-card:hover {
+    transform: translateY(-6px);
+    border-color: #ff4d4d;
+    background: rgba(30, 25, 45, 0.7);
+}
+
+.card-glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 30% 20%, rgba(255, 51, 102, 0.1), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.4s;
+    pointer-events: none;
+}
+
+.project-card:hover .card-glow {
+    opacity: 1;
+}
+
+.project-card h3 {
+    color: #ff6a6a;
+    font-size: 1.5rem;
+    margin-bottom: 0.8rem;
+    font-weight: 700;
+}
+
+.project-card p {
+    color: #cdcddf;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+.project-link {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    border-bottom: 2px solid #ff4d4d;
+    padding-bottom: 4px;
+    transition: all 0.2s;
+    display: inline-block;
+}
+
+.project-link:hover {
+    color: #ff8a8a;
+    border-bottom-color: #ff8a8a;
+}
+
+/* =========================================================================
+   ❖ CONTACT — social icons (stable, no distortion)
+   ========================================================================= */
+.social-wrapper {
+    text-align: center;
+}
+
+.social-wrapper h3 {
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+    background: linear-gradient(120deg, #fff, #ffb3b3);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-weight: 600;
+}
+
+.social-icons-list {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    list-style: none;
+    gap: 2rem;
+    padding: 0;
+}
+
+.social-icons-list li {
+    width: 70px;
+    height: 70px;
+}
+
+.social-icons-list li a {
+    width: 100%;
+    height: 100%;
+    background: rgba(20, 18, 30, 0.7);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: #ffffff;
+    transition: all 0.3s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+    border: 1px solid rgba(255, 80, 80, 0.2);
+    text-decoration: none;
+    backdrop-filter: blur(2px);
+}
+
+.social-icons-list li a:hover {
+    background: var(--clr);
+    transform: translateY(-7px) scale(1.08);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3), 0 0 0 2px rgba(255, 255, 255, 0.2);
+    border-color: transparent;
+    color: white;
+}
+
+/* =========================================================================
+   ❖ VISITOR COUNTER (fixed, stable)
+   ========================================================================= */
+.visitor-counter {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(10px);
+    border: 1px solid #ff4d4d;
+    border-radius: 40px;
+    padding: 0.6rem 1.4rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #ff7b7b;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: monospace;
+    letter-spacing: 0.5px;
+}
+
+.visitor-counter i {
+    font-size: 1rem;
+}
+
+#live-view-count {
+    font-weight: 800;
+    color: #ffaaaa;
+    background: #1a0f0f;
+    padding: 0 5px;
+    border-radius: 20px;
+    min-width: 60px;
+    display: inline-block;
+    text-align: center;
+}
+
+/* =========================================================================
+   ❖ RESPONSIVE (mobile perfection)
+   ========================================================================= */
+@media (max-width: 780px) {
+    .glass-panel {
+        padding: 1.5rem;
+    }
+    .nav-btn {
+        padding: 0.5rem 1.2rem;
+        font-size: 0.9rem;
+    }
+    .ilya-name {
+        font-size: 2.7rem;
+    }
+    .bio-box {
+        font-size: 1rem;
+        padding: 1.2rem;
+    }
+    .social-icons-list li {
+        width: 55px;
+        height: 55px;
+    }
+    .social-icons-list li a {
+        font-size: 1.4rem;
+    }
+    .visitor-counter {
+        bottom: 12px;
+        right: 12px;
+        font-size: 0.75rem;
+        padding: 0.4rem 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .projects-grid {
+        gap: 1rem;
+    }
+    .nav-list {
+        gap: 0.2rem;
+    }
+    .nav-btn {
+        padding: 0.4rem 1rem;
+        font-size: 0.8rem;
+    }
+}
