@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="description" content="إيليا — مهندس برمجيات، مطور ذكاء اصطناعي وواجهات WebGL">
+    <meta name="theme-color" content="#030105">
+    <meta property="og:title" content="إيليا | مهندس برمجيات">
+    <meta property="og:description" content="مطور ذكاء اصطناعي وبوتات تيليجرام وواجهات WebGL">
+    <title>إيليا | مهندس برمجيات</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ═══════════════ PRELOADER ═══════════════ -->
+<div id="preloader">
+    <div class="pre-ring">
+        <div class="pre-ring-inner"></div>
+    </div>
+    <p class="pre-text">جارٍ التحميل…</p>
+    <div class="pre-bar"><div class="pre-fill"></div></div>
+</div>
+
+<!-- ═══════════════ BACKGROUND CANVAS ═══════════════ -->
+<canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+<!-- ═══════════════ AMBIENT GLOW ORBS ═══════════════ -->
+<div class="ambient-orb orb-red" aria-hidden="true"></div>
+<div class="ambient-orb orb-purple" aria-hidden="true"></div>
+
+<!-- ═══════════════ MAIN APP ═══════════════ -->
+<div id="app">
+
+    <!-- ── NAV ── -->
+    <header id="header">
+        <nav class="nav-pill" role="navigation" aria-label="القائمة الرئيسية">
+            <button class="nav-btn active" data-section="home" aria-pressed="true">
+                <i class="fa-solid fa-house" aria-hidden="true"></i>
+                <span>الرئيسية</span>
+            </button>
+            <button class="nav-btn" data-section="projects" aria-pressed="false">
+                <i class="fa-solid fa-code-branch" aria-hidden="true"></i>
+                <span>المشاريع</span>
+            </button>
+            <button class="nav-btn" data-section="contact" aria-pressed="false">
+                <i class="fa-solid fa-satellite-dish" aria-hidden="true"></i>
+                <span>التواصل</span>
+            </button>
+            <div class="nav-glider" aria-hidden="true"></div>
+        </nav>
+    </header>
+
+    <!-- ── MAIN CONTENT ── -->
+    <main id="main-content">
+
+        <!-- ════ HOME SECTION ════ -->
+        <section id="home" class="section active" aria-label="الرئيسية">
+
+            <!-- Hero Card (floating wave) -->
+            <div class="hero-card glass-card wave-card" data-wave-delay="0">
+
+                <!-- Banner -->
+                <div class="banner-wrap">
+                    <img src="https://iili.io/fb6SvS9.md.jpg"
+                         alt="خلفية إيليا"
+                         class="banner-img"
+                         loading="eager"
+                         onerror="this.style.display='none';this.parentElement.classList.add('banner-fallback')">
+                    <div class="banner-shimmer" aria-hidden="true"></div>
+                    <div class="banner-vignette" aria-hidden="true"></div>
+                </div>
+
+                <!-- Profile -->
+                <div class="profile-wrap" aria-label="صورة الملف الشخصي">
+                    <div class="profile-frame">
+                        <img src="https://iili.io/fb64ziv.md.jpg"
+                             alt="صورة إيليا"
+                             class="profile-img"
+                             loading="eager"
+                             onerror="this.src='data:image/svg+xml,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;120&quot; height=&quot;120&quot; viewBox=&quot;0 0 120 120&quot;><circle cx=&quot;60&quot; cy=&quot;60&quot; r=&quot;60&quot; fill=&quot;%238a2be2&quot;/><text x=&quot;50%&quot; y=&quot;50%&quot; text-anchor=&quot;middle&quot; dy=&quot;.35em&quot; font-size=&quot;40&quot; fill=&quot;white&quot;>إ</text></svg>'">
+                        <div class="pulse r1" aria-hidden="true"></div>
+                        <div class="pulse r2" aria-hidden="true"></div>
+                        <div class="pulse r3" aria-hidden="true"></div>
+                    </div>
+                </div>
+
+                <!-- Text Content -->
+                <div class="hero-body">
+                    <h1 class="name-glitch" data-text="إيليا">إيليا</h1>
+                    <p class="name-role">
+                        <span class="role-tag">مهندس برمجيات</span>
+                        <span class="role-dot" aria-hidden="true">✦</span>
+                        <span class="role-tag">مطوّر ذكاء اصطناعي</span>
+                    </p>
+
+                    <div class="bio-card">
+                        <p>أبني أنظمة رقمية متكاملة — من واجهات WebGL التفاعلية والمذهلة، إلى بوتات الذكاء الاصطناعي المتقدمة على تيليجرام.</p>
+                        <p>تخصصي: دمج المنطق الحسابي الدقيق مع التصميم البصري الذي يتخطى الزمن ويتجاوز المعايير.</p>
+                    </div>
+
+                    <div class="skills-wrap" aria-label="المهارات التقنية">
+                        <span class="skill-chip"><i class="fa-solid fa-cube" aria-hidden="true"></i> WebGL</span>
+                        <span class="skill-chip"><i class="fa-brands fa-python" aria-hidden="true"></i> Python</span>
+                        <span class="skill-chip"><i class="fa-solid fa-mobile-screen" aria-hidden="true"></i> Flutter</span>
+                        <span class="skill-chip"><i class="fa-solid fa-brain" aria-hidden="true"></i> AI / ML</span>
+                        <span class="skill-chip"><i class="fa-brands fa-telegram" aria-hidden="true"></i> Telegram Bot</span>
+                        <span class="skill-chip"><i class="fa-brands fa-js" aria-hidden="true"></i> JavaScript</span>
+                    </div>
+                </div>
+
+            </div><!-- /hero-card -->
+
+            <!-- ══ COUNTER STAGE ══ -->
+            <div class="counter-stage" aria-label="عداد الزوار">
+                <div class="counter-glass wave-card" data-wave-delay="0.5">
+                    <div class="counter-icon" aria-hidden="true">
+                        <i class="fa-solid fa-signal"></i>
+                    </div>
+                    <div class="counter-body">
+                        <p class="counter-label">إجمالي الزوار الحقيقيين</p>
+                        <div class="counter-display">
+                            <span id="counter-num" aria-live="polite">0</span>
+                        </div>
+                        <p class="counter-sub">
+                            <span class="dot-live" aria-hidden="true"></span>
+                            يتجدد مع كل زيارة جديدة
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </section><!-- /home -->
+
+        <!-- ════ PROJECTS SECTION ════ -->
+        <section id="projects" class="section hidden" aria-label="المشاريع">
+            <h2 class="section-heading">
+                <span class="sh-line" aria-hidden="true"></span>
+                المشاريع
+                <span class="sh-line" aria-hidden="true"></span>
+            </h2>
+            <p class="section-sub">مشاريع حقيقية تعمل على الإنترنت الآن</p>
+
+            <div class="projects-grid">
+
+                <article class="proj-card glass-card wave-card" data-wave-delay="0" tabindex="0" aria-label="مشروع بوت ILYA AI">
+                    <div class="proj-glow" style="--gc:#ff003c" aria-hidden="true"></div>
+                    <div class="proj-icon-wrap" style="--gc:#ff003c" aria-hidden="true">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div class="proj-content">
+                        <h3>بوت ILYA AI</h3>
+                        <p>محرك ذكاء اصطناعي شامل عبر تيليجرام — يدعم توليد الصور والفيديو والموسيقى والمحادثة الذكية في منصة واحدة متكاملة.</p>
+                        <div class="tech-row" aria-label="التقنيات المستخدمة">
+                            <span>Python</span>
+                            <span>pyTelegramBotAPI</span>
+                            <span>AI APIs</span>
+                        </div>
+                    </div>
+                    <a href="https://t.me/ILYA3bot" target="_blank" rel="noopener" class="proj-btn" aria-label="فتح بوت ILYA AI على تيليجرام">
+                        <i class="fa-brands fa-telegram" aria-hidden="true"></i>
+                        فتح البوت
+                    </a>
+                </article>
+
+                <article class="proj-card glass-card wave-card" data-wave-delay="0.2" tabindex="0" aria-label="مشروع MR7 Chat">
+                    <div class="proj-glow" style="--gc:#7b2fff" aria-hidden="true"></div>
+                    <div class="proj-icon-wrap" style="--gc:#7b2fff" aria-hidden="true">
+                        <i class="fa-solid fa-comments"></i>
+                    </div>
+                    <div class="proj-content">
+                        <h3>MR7 Chat</h3>
+                        <p>تطبيق دردشة فوري مبني بـ Flutter/Firebase مع تكاملات ذكاء اصطناعي متعددة — Gemini وDeepSeek وتوليد وسائط متقدم.</p>
+                        <div class="tech-row" aria-label="التقنيات المستخدمة">
+                            <span>Flutter</span>
+                            <span>Firebase</span>
+                            <span>Gemini AI</span>
+                        </div>
+                    </div>
+                    <a href="https://t.me/swc_t" target="_blank" rel="noopener" class="proj-btn" aria-label="مشاهدة مشروع MR7 Chat">
+                        <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+                        استعراض
+                    </a>
+                </article>
+
+                <article class="proj-card glass-card wave-card" data-wave-delay="0.4" tabindex="0" aria-label="مشروع ILYA Services">
+                    <div class="proj-glow" style="--gc:#cc0044" aria-hidden="true"></div>
+                    <div class="proj-icon-wrap" style="--gc:#cc0044" aria-hidden="true">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+                    <div class="proj-content">
+                        <h3>ILYA Services</h3>
+                        <p>منصة ويب متكاملة لخدمات الذكاء الاصطناعي — مبنية بـ HTML/CSS/JS مع خلفية Python/Flask وتأثيرات Canvas مذهلة.</p>
+                        <div class="tech-row" aria-label="التقنيات المستخدمة">
+                            <span>JavaScript</span>
+                            <span>Flask</span>
+                            <span>Canvas API</span>
+                        </div>
+                    </div>
+                    <a href="https://t.me/swc_t" target="_blank" rel="noopener" class="proj-btn" aria-label="زيارة منصة ILYA Services">
+                        <i class="fa-solid fa-globe" aria-hidden="true"></i>
+                        الموقع
+                    </a>
+                </article>
+
+                <article class="proj-card glass-card wave-card" data-wave-delay="0.6" tabindex="0" aria-label="مشروع واحة الإيمان">
+                    <div class="proj-glow" style="--gc:#00c896" aria-hidden="true"></div>
+                    <div class="proj-icon-wrap" style="--gc:#00c896" aria-hidden="true">
+                        <i class="fa-solid fa-mosque"></i>
+                    </div>
+                    <div class="proj-content">
+                        <h3>واحة الإيمان</h3>
+                        <p>تطبيق ويب إسلامي شيعي شامل — القرآن الكريم، الأدعية، سيرة الأئمة، مواقيت الصلاة، والتقويم الهجري بتصميم عربي أصيل.</p>
+                        <div class="tech-row" aria-label="التقنيات المستخدمة">
+                            <span>HTML/CSS</span>
+                            <span>JavaScript</span>
+                            <span>Quran API</span>
+                        </div>
+                    </div>
+                    <a href="https://t.me/swc_t" target="_blank" rel="noopener" class="proj-btn" aria-label="زيارة تطبيق واحة الإيمان">
+                        <i class="fa-solid fa-arrow-up-right-from-square" aria-hidden="true"></i>
+                        استعراض
+                    </a>
+                </article>
+
+            </div>
+        </section><!-- /projects -->
+
+        <!-- ════ CONTACT SECTION ════ -->
+        <section id="contact" class="section hidden" aria-label="التواصل">
+            <h2 class="section-heading">
+                <span class="sh-line" aria-hidden="true"></span>
+                التواصل
+                <span class="sh-line" aria-hidden="true"></span>
+            </h2>
+            <p class="section-sub">اختر المنصة للتواصل المباشر</p>
+
+            <div class="contact-grid">
+
+                <a href="https://t.me/swc_t" target="_blank" rel="noopener"
+                   class="contact-card glass-card wave-card"
+                   data-wave-delay="0"
+                   style="--cc:#0088cc"
+                   aria-label="تيليجرام — @swc_t">
+                    <div class="cc-glow" aria-hidden="true"></div>
+                    <div class="cc-icon" aria-hidden="true">
+                        <i class="fa-brands fa-telegram"></i>
+                    </div>
+                    <span class="cc-name">تيليجرام</span>
+                    <span class="cc-handle">@swc_t</span>
+                    <span class="cc-arrow" aria-hidden="true"><i class="fa-solid fa-arrow-up-left"></i></span>
+                </a>
+
+                <a href="https://t.me/ILYA3bot" target="_blank" rel="noopener"
+                   class="contact-card glass-card wave-card"
+                   data-wave-delay="0.15"
+                   style="--cc:#7b2fff"
+                   aria-label="بوت ILYA على تيليجرام — @ILYA3bot">
+                    <div class="cc-glow" aria-hidden="true"></div>
+                    <div class="cc-icon" aria-hidden="true">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <span class="cc-name">بوت ILYA AI</span>
+                    <span class="cc-handle">@ILYA3bot</span>
+                    <span class="cc-arrow" aria-hidden="true"><i class="fa-solid fa-arrow-up-left"></i></span>
+                </a>
+
+                <a href="https://instagram.com/szc2v" target="_blank" rel="noopener"
+                   class="contact-card glass-card wave-card"
+                   data-wave-delay="0.3"
+                   style="--cc:#e1306c"
+                   aria-label="إنستغرام — @szc2v">
+                    <div class="cc-glow" aria-hidden="true"></div>
+                    <div class="cc-icon" aria-hidden="true">
+                        <i class="fa-brands fa-instagram"></i>
+                    </div>
+                    <span class="cc-name">إنستغرام</span>
+                    <span class="cc-handle">@szc2v</span>
+                    <span class="cc-arrow" aria-hidden="true"><i class="fa-solid fa-arrow-up-left"></i></span>
+                </a>
+
+                <a href="https://youtube.com/@scv_t" target="_blank" rel="noopener"
+                   class="contact-card glass-card wave-card"
+                   data-wave-delay="0.45"
+                   style="--cc:#ff0000"
+                   aria-label="يوتيوب — @scv_t">
+                    <div class="cc-glow" aria-hidden="true"></div>
+                    <div class="cc-icon" aria-hidden="true">
+                        <i class="fa-brands fa-youtube"></i>
+                    </div>
+                    <span class="cc-name">يوتيوب</span>
+                    <span class="cc-handle">@scv_t</span>
+                    <span class="cc-arrow" aria-hidden="true"><i class="fa-solid fa-arrow-up-left"></i></span>
+                </a>
+
+            </div>
+
+            <!-- Contact message card -->
+            <div class="contact-msg-wrap glass-card wave-card" data-wave-delay="0.6">
+                <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+                <p>جميع قنوات التواصل محمية — تواصل مباشرة عبر أي من المنصات أعلاه.</p>
+            </div>
+
+        </section><!-- /contact -->
+
+    </main>
+
+    <!-- ── FOOTER ── -->
+    <footer id="footer" aria-label="تذييل الصفحة">
+        <p>
+            صُنع بإتقان بواسطة
+            <span class="footer-name">جلال · إيليا</span>
+            <span class="footer-sep" aria-hidden="true">✦</span>
+            جميع الحقوق محفوظة &copy; <span id="yr"></span>
+        </p>
+    </footer>
+
+</div><!-- /app -->
+
+<!-- ═══════════════ SCRIPTS ═══════════════ -->
+<!-- GSAP (animation engine) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+<!-- Main Script -->
+<script src="script.js" defer></script>
+
+</body>
+</html>
